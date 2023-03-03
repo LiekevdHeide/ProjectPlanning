@@ -9,6 +9,12 @@ python = "^3.9, <3.12"
 numpy = "^1.23.3"
 scipy = "^1.9.1"
 
+[tool.black]
+line-length = 79
+
+[tool.pytest.ini_options]
+filterwarnings = ["ignore::DeprecationWarning"]
+
 [tool.poetry.dev-dependencies]
 
 [build-system]
