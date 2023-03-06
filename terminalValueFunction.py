@@ -29,4 +29,7 @@ def final_costs(setting, schedule, phase, time):
         return phase_costs
 
     # otherwise: continue to next phase
-    return gFunction.g_func(setting, 3, schedule, phase + 1, time)
+    phase += 1
+    return gFunction.g_func(
+        setting, setting[sDict.WorkPerPhase][phase], schedule, phase, time
+    )

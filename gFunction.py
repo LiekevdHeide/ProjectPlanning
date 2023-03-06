@@ -18,22 +18,22 @@ sDict = SettingsDictionary.Settings
 
 
 # @functools.cache  # alternative for higher Python versions (3.9)
-# @listToTuple  # change the np.array to a tuple (which is hashable..)
 @functools.lru_cache(maxsize=None)
-def g_func(setting, remaining, schedule, phase, t):
+def g_func(setting, remaining, schedule_old, phase, t):
     # if all work is finished this phase OR time until deadline is 0
     print(f"g_func work {remaining} at {t} phase {phase}")
     if remaining == 0 or t == setting[sDict.Deadline]:
-        return terminalValueFunction.final_costs(setting, schedule, phase, t)
+        return terminalValueFunction.final_costs(
+            setting, schedule_old, phase, t)
 
     # if the project is not finished, define costs + future schedules
     cost_no = 0.0
-    schedule_no = np.roll(schedule, -1)
+    schedule_no = np.roll(schedule_old, -1)
     schedule_no[-1] = 0
     schedule_no = tuple(schedule_no)
     # if shift t+L is not scheduled:
     # if current shift is implemented
-    if schedule[0] == 1:
+    if schedule_old[0] == 1:
         # calculate expected value of not scheduling shift t+L
         cost_no = expected_value(setting, remaining, schedule_no, phase, t + 1)
     # if current shift is not scheduled x'(0)
@@ -55,12 +55,12 @@ def g_func(setting, remaining, schedule, phase, t):
             + f" {len(setting[sDict.ShiftCost])}"
         )
         cost_yes = setting[sDict.ShiftCost][t + setting[sDict.LeadTime]]
-        schedule_yes = np.roll(schedule, -1)
+        schedule_yes = np.roll(schedule_old, -1)
         schedule_yes[-1] = 1
         schedule_yes = tuple(schedule_yes)
 
         # if current shift is implemented
-        if schedule[0] == 1:
+        if schedule_old[0] == 1:
             # add expected value of continuing with x'(1)
             cost_yes = expected_value(
                 setting, remaining, schedule_yes, phase, t + 1
@@ -73,8 +73,13 @@ def g_func(setting, remaining, schedule, phase, t):
 
 def expected_value(setting, remaining, schedule, phase, t):
     cost = 0.0
-    for epsilon in range(0, 2):
-        cost += (1 / 3) * g_func(
-            setting, max(remaining - epsilon, 0), schedule, phase, t,
+    # for all values epsilon can take
+    for epsilon in range(len(setting[sDict.E_Values])):
+        # calculate the non-negative remaining work in case of this epsilon
+        rem_non_neg = max(remaining - setting[sDict.E_Values][epsilon], 0)
+
+        # calculate future cost if this epsilon indeed occurs
+        cost += setting[sDict.E_probs][epsilon] * g_func(
+            setting, rem_non_neg, schedule, phase, t,
         )
     return cost

@@ -31,5 +31,6 @@ def test_answer():
 """
 TO ADD: - test if work remaining costlier than no work remaining
         - test if in final phase less costly than in previous phase
-        - 
+        - test if cost is as expected for a very simple example
+        - test if t=T cost correct
 """

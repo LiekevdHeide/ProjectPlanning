@@ -10,34 +10,33 @@ import numpy as np
 import timeit
 import argparse
 
+import create_settings
 # own functions
 import gFunction
+import SettingsDictionary
 
+sDict = SettingsDictionary.Settings
 # np.set_printoptions(threshold=np.inf)
 
 
 def main():
     # get experiment setting
     args = parse_inputs()
-    number_shifts = args.T
-    lead_time = args.L
-    num_phases = args.N
-    number_shifts = number_shifts + lead_time
     stopwatch_start = timeit.default_timer()
 
+    settings = create_settings.create(args)
+
     # run algorithm
-    shift_costs = tuple(np.full(number_shifts + 1, 2))
-    remaining_work = 4  # int((number_shifts - lead_time) / 2)
+    remaining_work = settings[sDict.WorkPerPhase][0]  # 4
+    scheduled_shifts = tuple(
+        np.zeros(settings[sDict.LeadTime] + 1, dtype=int))
 
-    scheduled_shifts = tuple(np.zeros(lead_time + 1, dtype=int))
-
-    settings = (number_shifts, lead_time, num_phases, shift_costs)
     opt_cost = gFunction.g_func(
         settings, remaining_work, scheduled_shifts, phase=0, t=0
     )
     runtime = timeit.default_timer() - stopwatch_start
     print(f"Overall costs {opt_cost}")
-    print("runtime", runtime)
+    print("Runtime", runtime)
 
 
 def parse_inputs():
