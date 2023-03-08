@@ -18,9 +18,11 @@ def final_costs(setting, schedule, phase, time):
         + f"current phase {phase}"
     )
 
-    # if project is completed OR deadline is reached
-    if phase == setting[sDict.NumPhases]:
+    # if project is completed add final costs
+    if phase == setting[sDict.NumPhases] - 1:
         return setting[sDict.Deadline] - time * -10
+
+    # if time is finished add final costs
     if time == setting[sDict.Deadline]:
         # costs
         phase_costs = 0
