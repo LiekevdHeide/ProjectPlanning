@@ -38,6 +38,21 @@ def main():
     print(f"Overall costs {opt_cost}")
     print("Runtime", runtime)
 
+    stopwatch_start = timeit.default_timer()
+
+    # run new version of algorithm
+    settings = create_settings.create(args)
+    remaining_work = settings[sDict.WorkPerPhase][0]  # 4
+    scheduled_shifts = tuple(
+        np.zeros(settings[sDict.LeadTime] + 1, dtype=int))
+
+    opt_cost = gFunction.g_func(
+        settings, remaining_work, scheduled_shifts, phase=0, t=0
+    )
+    runtime = timeit.default_timer() - stopwatch_start
+    print(f"Overall costs new method {opt_cost}")
+    print("Runtime new", runtime)
+
 
 def parse_inputs():
     parser = argparse.ArgumentParser()
