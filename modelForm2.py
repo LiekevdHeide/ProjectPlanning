@@ -56,24 +56,20 @@ def k_func(setting, remaining, schedule, phase, t):
 
 @functools.lru_cache(maxsize=None)
 def f_func(setting, remaining, schedule, n, t):
-    # work on next phase or on current phase
-    if remaining == 0:
-        return expected_value(
-            setting, setting[sDict.WorkPerPhase][n + 1], schedule, n + 1, t)
-    return expected_value(setting, remaining, schedule, n, t)
-
-
-@functools.lru_cache(maxsize=None)
-def expected_value(setting, remaining, schedule, phase, t):
+    # work on current phase, if no work remaining continue on hext phase
     # Calculate the expected remaining cost using probs & values of epsilon
     cost = 0.0
     # for all values epsilon can take
     for epsilon in range(len(setting[sDict.E_Values])):
         # calculate the non-negative remaining work in case of this epsilon
         rem_non_neg = max(remaining - setting[sDict.E_Values][epsilon], 0)
-
+        if rem_non_neg == 0:
+            cost += setting[sDict.E_probs][epsilon] * (
+                g_func(setting, setting[sDict.WorkPerPhase][n + 1], schedule, n + 1, t + 1,)
+            )
         # calculate future cost if this epsilon indeed occurs
-        cost += setting[sDict.E_probs][epsilon] * g_func(
-            setting, rem_non_neg, schedule, phase, t + 1,
-        )
+        else:
+            cost += setting[sDict.E_probs][epsilon] * g_func(
+                setting, rem_non_neg, schedule, n, t + 1,
+                )
     return cost
