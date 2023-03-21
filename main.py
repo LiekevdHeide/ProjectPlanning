@@ -5,6 +5,7 @@ The main() function imports the specific settings we use in the experiments.
 Then, we use the recursive g_function with these settings as inputs to
 calculate the overall optimal costs of scheduling shifts with uncertainty and
 a lead time $L$.
+Inputs of the form: -T 20 -L 2 -N 5
 """
 import numpy as np
 import timeit
