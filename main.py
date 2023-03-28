@@ -15,6 +15,7 @@ import create_settings
 # own functions
 import gFunction
 import SettingsDictionary
+import modelForm2
 
 sDict = SettingsDictionary.Settings
 # np.set_printoptions(threshold=np.inf)
@@ -47,7 +48,7 @@ def main():
     scheduled_shifts = tuple(
         np.zeros(settings[sDict.LeadTime] + 1, dtype=int))
 
-    opt_cost = gFunction.g_func(
+    opt_cost = modelForm2.g_func(
         settings, remaining_work, scheduled_shifts, phase=0, t=0
     )
     runtime = timeit.default_timer() - stopwatch_start

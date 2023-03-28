@@ -21,10 +21,10 @@ sDict = SettingsDictionary.Settings
 @functools.lru_cache(maxsize=None)
 def g_func(setting, remaining, schedule_old, phase, t):
     # if all work is finished this phase OR time until deadline is 0
-    print(f"g_func work {remaining} at {t} phase {phase}")
+    # print(f"g_func work {remaining} at {t} phase {phase}")
     if remaining == 0 or t == setting[sDict.Deadline]:
         return terminalValueFunction.final_costs(
-            setting, schedule_old, phase, t)
+            setting, schedule_old, phase, t), 0
 
     # if the project is not finished, define costs + future schedules
     cost_no = 0.0
@@ -38,12 +38,12 @@ def g_func(setting, remaining, schedule_old, phase, t):
         cost_no = expected_value(setting, remaining, schedule_no, phase, t + 1)
     # if current shift is not scheduled x'(0)
     else:
-        cost_no += g_func(setting, remaining, schedule_no, phase, t + 1)
+        cost_no += g_func(setting, remaining, schedule_no, phase, t + 1)[0]
 
     # check if possible to schedule shift t+L
     if t + setting[sDict.LeadTime] > setting[sDict.Deadline]:
         # no additional shifts can be scheduled => choose no
-        return cost_no
+        return cost_no, 0
     else:
         assert t + setting[sDict.LeadTime] <= setting[sDict.Deadline], (
             f"Schedule after deadline time {t} "
@@ -66,9 +66,11 @@ def g_func(setting, remaining, schedule_old, phase, t):
                 setting, remaining, schedule_yes, phase, t + 1
             )
         else:
-            cost_yes += g_func(setting, remaining, schedule_yes, phase, t + 1,)
+            cost_yes += g_func(setting, remaining, schedule_yes, phase, t + 1,)[0]
 
-        return min(cost_yes, cost_no)
+        cost_array = (cost_no, cost_yes)
+        print(t, remaining, schedule_old, cost_array)
+        return min(cost_array), cost_array.index(min(cost_array))
 
 
 def expected_value(setting, remaining, schedule, phase, t):
@@ -79,7 +81,7 @@ def expected_value(setting, remaining, schedule, phase, t):
         rem_non_neg = max(remaining - setting[sDict.E_Values][epsilon], 0)
 
         # calculate future cost if this epsilon indeed occurs
-        cost += setting[sDict.E_probs][epsilon] * g_func(
-            setting, rem_non_neg, schedule, phase, t,
-        )
+        g_c = g_func(setting, rem_non_neg, schedule, phase, t,)[0]
+        print("g_c", g_c)
+        cost += setting[sDict.E_probs][epsilon] * g_c
     return cost
