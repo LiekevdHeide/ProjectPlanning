@@ -13,7 +13,6 @@ import argparse
 
 import create_settings
 # own functions
-import gFunction
 import SettingsDictionary
 import modelForm2
 
@@ -26,31 +25,27 @@ def main():
     args = parse_inputs()
     stopwatch_start = timeit.default_timer()
 
+    # create settings and initial parameters
     settings = create_settings.create(args)
+    remaining_work = settings[sDict.WorkPerPhase][0]  # 4
+    scheduled_shifts = tuple(
+        np.zeros(settings[sDict.LeadTime] + 1, dtype=int))
 
     # run algorithm
-    remaining_work = settings[sDict.WorkPerPhase][0]  # 4
-    scheduled_shifts = tuple(
-        np.zeros(settings[sDict.LeadTime] + 1, dtype=int))
-
-    opt_cost = gFunction.g_func(
-        settings, remaining_work, scheduled_shifts, phase=0, t=0
-    )
-    runtime = timeit.default_timer() - stopwatch_start
-    print(f"Overall costs {opt_cost}")
-    print("Runtime", runtime)
-
-    stopwatch_start = timeit.default_timer()
-
-    # run new version of algorithm
-    settings = create_settings.create(args)
-    remaining_work = settings[sDict.WorkPerPhase][0]  # 4
-    scheduled_shifts = tuple(
-        np.zeros(settings[sDict.LeadTime] + 1, dtype=int))
-
     opt_cost = modelForm2.g_func(
         settings, remaining_work, scheduled_shifts, phase=0, t=0
     )
+
+    for phase in range(settings[sDict.NumPhases]):
+        for t in range(settings[sDict.Deadline]):
+            plan = np.zeros(settings[sDict.WorkPerPhase][phase], dtype=int)
+            cost = np.zeros(settings[sDict.WorkPerPhase][phase])
+            for r in range(settings[sDict.WorkPerPhase][phase]):
+                cost[r], plan[r] = modelForm2.g_func(
+                        settings, r, scheduled_shifts, phase, t
+                        )
+            print(phase, t, plan, cost)
+
     runtime = timeit.default_timer() - stopwatch_start
     print(f"Overall costs new method {opt_cost}")
     print("Runtime new", runtime)

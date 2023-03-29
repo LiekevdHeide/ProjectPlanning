@@ -3,7 +3,7 @@ Test function for the gFunction.
 """
 import numpy as np
 
-import gFunction
+import modelForm2
 import SettingsDictionary
 
 sDict = SettingsDictionary.Settings
@@ -37,8 +37,8 @@ def test_shift_cost():
     phase = 0
     t = 0
     schedule = tuple(np.zeros(setting[sDict.LeadTime] + 1))
-    cost_zero = gFunction.g_func(setting0, remaining, schedule, phase, t)
-    cost_one = gFunction.g_func(setting1, remaining, schedule, phase, t)
+    cost_zero = modelForm2.g_func(setting0, remaining, schedule, phase, t)
+    cost_one = modelForm2.g_func(setting1, remaining, schedule, phase, t)
     assert cost_zero < cost_one, (
         "Final costs not zero if zero costs"
         + f"zero cost {cost_zero}"
