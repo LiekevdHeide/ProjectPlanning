@@ -32,16 +32,16 @@ def main():
         np.zeros(settings[sDict.LeadTime] + 1, dtype=int))
 
     # run algorithm
-    opt_cost = modelForm2.g_func(
+    opt_cost = modelForm2.f_func(
         settings, remaining_work, scheduled_shifts, phase=0, t=0
     )
 
     for phase in range(settings[sDict.NumPhases]):
         for t in range(settings[sDict.Deadline]):
-            plan = np.zeros(settings[sDict.WorkPerPhase][phase], dtype=int)
-            cost = np.zeros(settings[sDict.WorkPerPhase][phase])
-            for r in range(settings[sDict.WorkPerPhase][phase]):
-                cost[r], plan[r] = modelForm2.g_func(
+            plan = np.zeros(settings[sDict.WorkPerPhase][phase] - 1, dtype=int)
+            cost = np.zeros(settings[sDict.WorkPerPhase][phase] - 1)
+            for r in range(1, settings[sDict.WorkPerPhase][phase]):
+                cost[r - 1], plan[r - 1] = modelForm2.g_func(
                         settings, r, scheduled_shifts, phase, t
                         )
             print(phase, t, plan, cost)

@@ -12,60 +12,67 @@ sDict = SettingsDictionary.Settings
 
 # @functools.cache  # alternative for higher Python versions (3.9)
 @functools.lru_cache(maxsize=None)
-def g_func(setting: tuple, remaining: int, schedule_no: Tuple[int], phase: int, t: int) -> (float, int):
+def f_func(
+    setting: tuple, remaining: int, schedule: Tuple[int], phase: int, t: int
+) -> float:
+    # Did we finish?
+    if t == setting[sDict.Deadline]:  # + 1:
+        # reached the deadline
+        return l_1(setting, phase)
+    if phase == setting[sDict.NumPhases] - 1 and remaining == 0:
+        # completed all phases
+        return l_2(setting, t)
+
+    # Continue scheduling
+    return g_func(setting, remaining, schedule, phase, t)[0]
+
+
+@functools.lru_cache(maxsize=None)
+def g_func(
+    setting: tuple, remaining: int, schedule_no: Tuple[int], phase: int, t: int
+) -> (float, int):
     if t > setting[sDict.Deadline] - setting[sDict.LeadTime]:
-        return g_tilde(setting, remaining, schedule_no, phase, t), 0
+        return h_func(setting, remaining, schedule_no, phase, t), 0
 
     schedule_yes = list(schedule_no)
     schedule_yes[setting[sDict.LeadTime]] = 1
     schedule_yes = tuple(schedule_yes)
 
+    # array of (not scheduling, scheduling) at time t + lead time
     cost_array = (
-        g_tilde(setting, remaining, schedule_no, phase, t),
-        setting[sDict.ShiftCost][t+setting[sDict.LeadTime]] +
-        g_tilde(setting, remaining, schedule_yes, phase, t)
+        h_func(setting, remaining, schedule_no, phase, t),
+        setting[sDict.ShiftC][t + setting[sDict.LeadTime]]
+        + h_func(setting, remaining, schedule_yes, phase, t),
     )
     return min(cost_array), cost_array.index(min(cost_array))
 
 
 @functools.lru_cache(maxsize=None)
-def g_tilde(setting: tuple, remaining: int, schedule: Tuple[int], phase: int, t: int) -> float:
-    if t == setting[sDict.Deadline] + 1:
-        # reached the deadline
-        return h_1(setting, phase)
-    if phase == setting[sDict.NumPhases] - 1 and remaining == 0:
-        # completed all phases
-        return h_2(setting, t)
-    return k_func(setting, remaining, schedule, phase, t)
+def l_1(setting: tuple, phase: int) -> float:
+    return sum(setting[sDict.PhaseC][phase:setting[sDict.NumPhases]])
 
 
 @functools.lru_cache(maxsize=None)
-def h_1(setting: tuple, phase: int) -> float:
-    phase_costs = 0
-    for n in range(phase, setting[sDict.NumPhases]):
-        phase_costs += 10
-    # ("h1: ", phase, phase_costs)
-    return phase_costs
-
-
-@functools.lru_cache(maxsize=None)
-def h_2(setting: tuple, time: int) -> float:
-    # print("h2: ", time, (setting[sDict.Deadline] - time) * -10)
+def l_2(setting: tuple, time: int) -> float:
     return (setting[sDict.Deadline] - time) * -10
 
 
 @functools.lru_cache(maxsize=None)
-def k_func(setting: tuple, remaining: int, schedule: Tuple[int], phase: int, t: int) -> float:
+def h_func(
+    setting: tuple, remaining: int, schedule: Tuple[int], phase: int, t: int
+) -> float:
     schedule = np.roll(schedule, -1)
     schedule = tuple(schedule)
     if schedule[0] == 0:
-        return g_func(setting, remaining, schedule, phase, t + 1)[0]
+        return f_func(setting, remaining, schedule, phase, t + 1)
 
-    return f_func(setting, remaining, schedule, phase, t)
+    return k_func(setting, remaining, schedule, phase, t)
 
 
 @functools.lru_cache(maxsize=None)
-def f_func(setting: tuple, remaining: int, schedule: Tuple[int], n: int, t: int) -> float:
+def k_func(
+    setting: tuple, remaining: int, schedule: Tuple[int], n: int, t: int
+) -> float:
     # work on current phase, if no work remaining continue on hext phase
     # Calculate the expected remaining cost using probs & values of epsilon
     cost = 0.0
@@ -76,15 +83,21 @@ def f_func(setting: tuple, remaining: int, schedule: Tuple[int], n: int, t: int)
         if rem_non_neg == 0:
             if n < setting[sDict.NumPhases] - 1:
                 cost += setting[sDict.E_probs][epsilon] * (
-                    g_func(setting, setting[sDict.WorkPerPhase][n + 1], schedule, n + 1, t + 1,)[0]
+                    f_func(
+                        setting,
+                        setting[sDict.WorkPerPhase][n + 1],
+                        schedule,
+                        n + 1,
+                        t + 1,
+                    )
                 )
             else:
                 cost += setting[sDict.E_probs][epsilon] * (
-                    g_func(setting, 0, schedule, n, t + 1,)[0]
+                    f_func(setting, 0, schedule, n, t + 1,)
                 )
         # calculate future cost if this epsilon indeed occurs
         else:
-            cost += setting[sDict.E_probs][epsilon] * g_func(
-                setting, rem_non_neg, schedule, n, t + 1,
-                )[0]
+            cost += setting[sDict.E_probs][epsilon] * (
+                f_func(setting, rem_non_neg, schedule, n, t + 1,)
+            )
     return cost

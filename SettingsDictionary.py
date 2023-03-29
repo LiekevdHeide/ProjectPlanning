@@ -10,9 +10,10 @@ from enum import IntEnum
 
 class Settings(IntEnum):
     Deadline = 0
-    ShiftCost = 1
+    ShiftC = 1
     LeadTime = 2
     NumPhases = 3
     WorkPerPhase = 4
-    E_Values = 5
-    E_probs = 6
+    PhaseC = 5
+    E_Values = 6
+    E_probs = 7
