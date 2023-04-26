@@ -11,10 +11,11 @@ import numpy as np
 import timeit
 import argparse
 
-import create_settings
 # own functions
+import create_settings
 import SettingsDictionary
 import modelForm2
+import plot_planning
 
 sDict = SettingsDictionary.Settings
 # np.set_printoptions(threshold=np.inf)
@@ -25,30 +26,34 @@ def main():
     args = parse_inputs()
     stopwatch_start = timeit.default_timer()
 
-    # create settings and initial parameters
-    settings = create_settings.create(args)
-    remaining_work = settings[sDict.WorkPerPhase][0]  # 4
+    # create setting and initial parameters
+    setting = create_settings.create(args)
+    remaining_work = setting[sDict.WorkPerPhase][0]  # 4
     scheduled_shifts = tuple(
-        np.zeros(settings[sDict.LeadTime] + 1, dtype=int))
+        np.zeros(setting[sDict.LeadTime] + 1, dtype=int))
 
     # run algorithm
     opt_cost = modelForm2.f_func(
-        settings, remaining_work, scheduled_shifts, phase=0, t=0
+        setting, remaining_work, scheduled_shifts, phase=0, t=0
     )
 
-    for phase in range(settings[sDict.NumPhases]):
-        for t in range(settings[sDict.Deadline]):
-            plan = np.zeros(settings[sDict.WorkPerPhase][phase] - 1, dtype=int)
-            cost = np.zeros(settings[sDict.WorkPerPhase][phase] - 1)
-            for r in range(1, settings[sDict.WorkPerPhase][phase]):
+    plan_all = np.zeros((setting[sDict.NumPhases],
+                        setting[sDict.Deadline],
+                        setting[sDict.WorkPerPhase][0]), dtype=int)
+    for phase in range(setting[sDict.NumPhases]):
+        for t in range(setting[sDict.Deadline]):
+            plan = np.zeros(setting[sDict.WorkPerPhase][phase], dtype=int)
+            cost = np.zeros(setting[sDict.WorkPerPhase][phase])
+            for r in range(1, setting[sDict.WorkPerPhase][phase] + 1):
                 cost[r - 1], plan[r - 1] = modelForm2.g_func(
-                        settings, r, scheduled_shifts, phase, t
+                        setting, r, scheduled_shifts, phase, t
                         )
-            print(phase, t, plan, cost)
+                plan_all[phase, t, r - 1] = plan[r - 1]
+            print(phase, t, plan, plan_all[phase][t], cost)
 
+    plot_planning.create(setting, plan_all)
     runtime = timeit.default_timer() - stopwatch_start
-    print(f"Overall costs new method {opt_cost}")
-    print("Runtime new", runtime)
+    print(f"Overall costs {opt_cost} and runtime {runtime}")
 
 
 def parse_inputs():
