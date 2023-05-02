@@ -30,7 +30,8 @@ def main():
     setting = create_settings.create(args)
     remaining_work = setting[sDict.WorkPerPhase][0]  # 4
     scheduled_shifts = tuple(
-        np.zeros(setting[sDict.LeadTime] + 1, dtype=int))
+        np.zeros(setting[sDict.LeadTime] + 1, dtype=int)
+    )
 
     # run algorithm
     opt_cost = modelForm2.f_func(
@@ -38,20 +39,34 @@ def main():
     )
 
     plan_all = np.zeros((setting[sDict.NumPhases],
-                        setting[sDict.Deadline],
-                        setting[sDict.WorkPerPhase][0]), dtype=int)
+                        setting[sDict.WorkPerPhase][0],
+                         setting[sDict.Deadline],), dtype=int)
     for phase in range(setting[sDict.NumPhases]):
-        for t in range(setting[sDict.Deadline]):
-            plan = np.zeros(setting[sDict.WorkPerPhase][phase], dtype=int)
-            cost = np.zeros(setting[sDict.WorkPerPhase][phase])
-            for r in range(1, setting[sDict.WorkPerPhase][phase] + 1):
-                cost[r - 1], plan[r - 1] = modelForm2.g_func(
+        for r in range(1, setting[sDict.WorkPerPhase][phase] + 1):
+            plan = np.zeros(setting[sDict.Deadline], dtype=int)
+            cost = np.zeros(setting[sDict.Deadline])
+            for t in range(setting[sDict.Deadline]):
+                cost[t], plan[t] = modelForm2.g_func(
                         setting, r, scheduled_shifts, phase, t
                         )
-                plan_all[phase, t, r - 1] = plan[r - 1]
-            print(phase, t, plan, plan_all[phase][t], cost)
+                plan_all[phase, r - 1, t] = plan[t]
+            print(f"phase:{phase} work remaining: {r - 1}", plan, cost)
+
+    # Look at the weird no schedule blocks:
+    schedule_no = scheduled_shifts
+    schedule_yes = list(scheduled_shifts)
+    schedule_yes[setting[sDict.LeadTime]] = 1
+    schedule_yes = tuple(schedule_yes)
+
+    for t in range(5, 20):
+        no_sched = modelForm2.h_func(setting, 1,
+                                     schedule_no, 3, t)
+        sched = setting[sDict.ShiftC][t + setting[sDict.LeadTime]]
+        sched += modelForm2.h_func(setting, 1, schedule_yes, 3, t)
+        print(t, no_sched, sched, no_sched==sched)
 
     plot_planning.create(setting, plan_all)
+
     runtime = timeit.default_timer() - stopwatch_start
     print(f"Overall costs {opt_cost} and runtime {runtime}")
 
