@@ -5,7 +5,6 @@ import functools
 import numpy as np
 
 import SettingsDictionary
-from typing import Tuple
 
 sDict = SettingsDictionary.Settings
 
@@ -13,10 +12,11 @@ sDict = SettingsDictionary.Settings
 # @functools.cache  # alternative for higher Python versions (3.9)
 @functools.lru_cache(maxsize=None)
 def f_func(
-    setting: tuple, remaining: int, schedule: Tuple[int], phase: int, t: int
+    setting: tuple, remaining: int, schedule: tuple[int], phase: int, t: int
 ) -> float:
+    assert t > 0, f"Error: Input time t={t} should be greater than 0."
     # Did we finish?
-    if t == setting[sDict.Deadline]:  # + 1:
+    if t == setting[sDict.Deadline] + 1:
         # reached the deadline
         return l_1(setting, phase)
     if phase == setting[sDict.NumPhases] - 1 and remaining == 0:
@@ -29,7 +29,7 @@ def f_func(
 
 @functools.lru_cache(maxsize=None)
 def g_func(
-    setting: tuple, remaining: int, schedule_no: Tuple[int], phase: int, t: int
+    setting: tuple, remaining: int, schedule_no: tuple[int], phase: int, t: int
 ) -> (float, int):
     if t > setting[sDict.Deadline] - setting[sDict.LeadTime]:
         return h_func(setting, remaining, schedule_no, phase, t), 0
@@ -59,7 +59,7 @@ def l_2(setting: tuple, time: int) -> float:
 
 @functools.lru_cache(maxsize=None)
 def h_func(
-    setting: tuple, remaining: int, schedule: Tuple[int], phase: int, t: int
+    setting: tuple, remaining: int, schedule: tuple[int], phase: int, t: int
 ) -> float:
     schedule = np.roll(schedule, -1)
     schedule = tuple(schedule)
@@ -71,7 +71,7 @@ def h_func(
 
 @functools.lru_cache(maxsize=None)
 def k_func(
-    setting: tuple, remaining: int, schedule: Tuple[int], n: int, t: int
+    setting: tuple, remaining: int, schedule: tuple[int], n: int, t: int
 ) -> float:
     # work on current phase, if no work remaining continue on hext phase
     # Calculate the expected remaining cost using probs & values of epsilon

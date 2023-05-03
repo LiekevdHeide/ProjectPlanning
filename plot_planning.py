@@ -18,30 +18,34 @@ sDict = SettingsDictionary.Settings
 
 
 def create(setting, planning):
-    fig, axarr = plt.subplots(setting[sDict.NumPhases], 1)
+    fig, axarr = plt.subplots(setting[sDict.NumPhases], 1)  # , sharex=True
     fig.set_size_inches(5, 2.5 * setting[sDict.NumPhases])
-    fig.suptitle(f"Schedule for each phase leadtime {setting[sDict.LeadTime]}",
-                 fontsize=16)
-    im = axarr[0].imshow(planning[0], cmap=plt.cm.autumn, interpolation='none')
+    fig.suptitle(
+        f"Schedule for each phase leadtime {setting[sDict.LeadTime]}",
+        fontsize=16,
+    )
+    im = axarr[0].imshow(planning[0], cmap=plt.cm.autumn, interpolation="none")
     for i in range(1, setting[sDict.NumPhases]):
-        axarr[i].imshow(planning[i], cmap=plt.cm.autumn, interpolation='none')
+        axarr[i].imshow(planning[i], cmap=plt.cm.autumn, interpolation="none")
 
     for i in range(setting[sDict.NumPhases]):
         axarr[i].set_ylabel("Remaining work")
         axarr[i].set_xlabel("Time")
-        axarr[i].set_title(f'Phase {i + 1}')
+        axarr[i].set_title(f"Phase {i + 1}")
         axarr[i].invert_yaxis()
-    #    # Major ticks
+        #    # Major ticks
         axarr[i].xaxis.set_major_locator(
-            mticker.MaxNLocator(min(10, setting[sDict.Deadline]),
-                                integer=True))
+            mticker.MaxNLocator(min(10, setting[sDict.Deadline]), integer=True)
+        )
         ticks_loc = axarr[i].get_xticks().tolist()
         axarr[i].xaxis.set_major_locator(mticker.FixedLocator(ticks_loc))
-        axarr[i].set_xticklabels([int(x) for x in ticks_loc])
+        axarr[i].set_xticklabels([int(x + 1) for x in ticks_loc])
 
         axarr[i].yaxis.set_major_locator(
-            mticker.MaxNLocator(min(5, setting[sDict.WorkPerPhase][i]),
-                                integer=True))
+            mticker.MaxNLocator(
+                min(5, setting[sDict.WorkPerPhase][i]), integer=True
+            )
+        )
         ticks_loc = axarr[i].get_yticks().tolist()
         axarr[i].yaxis.set_major_locator(mticker.FixedLocator(ticks_loc))
         axarr[i].set_yticklabels([int(y + 1) for y in ticks_loc])
@@ -55,10 +59,10 @@ def create(setting, planning):
         )
 
         # Gridlines based on minor ticks
-        axarr[i].grid(which='minor', color='w', linestyle='-', linewidth=1.5)
+        axarr[i].grid(which="minor", color="w", linestyle="-", linewidth=1.5)
         # Remove minor ticks
         axarr[i].tick_params(
-            which='minor', bottom=False, top=False, left=False
+            which="minor", bottom=False, top=False, left=False
         )
 
     # get the colors of the values, according to the
@@ -67,11 +71,16 @@ def create(setting, planning):
     # create a patch (proxy artist) for every color
     patches = [
         mpatches.Patch(color=colors[0], label="Don't schedule".format()),
-        mpatches.Patch(color=colors[1], label="Schedule".format())
+        mpatches.Patch(color=colors[1], label="Schedule".format()),
     ]
     # put those patched as legend-handles into the legend
-    plt.figlegend(handles=patches, loc='upper right', ncol=2,
-                  bbox_to_anchor=(0.99, 0.965), frameon=False)
+    plt.figlegend(
+        handles=patches,
+        loc="upper right",
+        ncol=2,
+        bbox_to_anchor=(0.99, 0.965),
+        frameon=False,
+    )
     plt.tight_layout()
     # fig.subplots_adjust(top=0.88) # in combination with tight_layout
     plt.savefig(f"Plot_schedule_{setting[sDict.WorkPerPhase][0]}.pdf")
