@@ -44,6 +44,17 @@ def main():
         ),
         dtype=int,
     )
+    cost_no = np.copy(plan_all)
+    cost_yes = np.copy(plan_all)
+    correct_no = np.copy(plan_all)
+    correct_yes = np.copy(plan_all)
+
+    # Look at the weird no schedule blocks:
+    schedule_no = scheduled_shifts
+    schedule_yes = list(scheduled_shifts)
+    schedule_yes[setting[sDict.LeadTime]] = 1
+    schedule_yes = tuple(schedule_yes)
+
     for phase in range(setting[sDict.NumPhases]):
         for r in range(1, setting[sDict.WorkPerPhase][phase] + 1):
             plan = np.zeros(setting[sDict.Deadline], dtype=int)
@@ -53,20 +64,36 @@ def main():
                     setting, r, scheduled_shifts, phase, t
                 )
                 plan_all[phase, r - 1, t - 1] = plan[t - 1]
+                cost_no[phase, r - 1, t - 1] = modelForm2.h_func(setting, r, schedule_no, phase, t)
+                cost_yes[phase, r - 1, t - 1] = setting[sDict.ShiftC][t + setting[sDict.LeadTime]]
+                cost_yes[phase, r - 1, t - 1] += modelForm2.h_func(setting, r, schedule_yes, phase, t)
             print(f"phase:{phase + 1} work remaining: {r - 1}", plan, cost)
 
-    # Look at the weird no schedule blocks:
-    schedule_no = scheduled_shifts
-    schedule_yes = list(scheduled_shifts)
-    schedule_yes[setting[sDict.LeadTime]] = 1
-    schedule_yes = tuple(schedule_yes)
-
     for phase in range(setting[sDict.NumPhases]):
-        for t in range(setting[sDict.Deadline] - 10, setting[sDict.Deadline]):
-            no_sched = modelForm2.h_func(setting, 1, schedule_no, phase, t)
-            sched = setting[sDict.ShiftC][t + setting[sDict.LeadTime]]
-            sched += modelForm2.h_func(setting, 1, schedule_yes, phase, t)
-            print(phase + 1, t, no_sched, sched, no_sched == sched)
+        for r in range(2, setting[sDict.WorkPerPhase][phase] + 1):
+            for t in range(1, setting[sDict.Deadline]):
+                # check if yes/no costs correct:
+                if cost_yes[phase, r - 1, t - 1] != min(cost_yes[phase, r - 2, t], cost_no[phase, r - 2, t]):
+                    print(f"phase {phase} rem. {r - 1} t {t - 1} costY={cost_yes[phase, r - 1, t - 1]}" +
+                          f" at rem. {r - 2}, t {t} yes: {cost_yes[phase, r - 2, t]} no: {cost_no[phase, r - 2, t]} ")
+                if cost_no[phase, r - 1, t - 1] != min(cost_yes[phase, r - 1, t], cost_no[phase, r - 1, t]):
+                    print(f"phase {phase} rem. {r - 1} t {t - 1} costN={cost_no[phase, r - 1, t - 1]}" +
+                          f" at rem. {r - 1}, t {t} yes: {cost_yes[phase, r - 1, t]} no: {cost_no[phase, r - 1, t]} ")
+
+                correct_yes[phase, r - 1, t - 1] = cost_yes[phase, r - 1, t - 1] == min(cost_yes[phase, r - 2, t],
+                                                             cost_no[phase, r - 2, t])
+                correct_no[phase, r - 1, t - 1] = cost_no[phase, r - 1, t - 1] == min(cost_yes[phase, r - 1, t],
+                                                             cost_no[phase, r - 1, t])
+    print(correct_no)
+    print(correct_yes)
+
+    # for phase in range(0, 1):  # setting[sDict.NumPhases]):
+    #    for r in range(1, setting[sDict.WorkPerPhase][phase] + 1):
+    #        for t in range(1, setting[sDict.Deadline] + 1):
+    #            no_sched = modelForm2.h_func(setting, r, schedule_no, phase, t)
+    #            sched = setting[sDict.ShiftC][t + setting[sDict.LeadTime]]
+    #            sched += modelForm2.h_func(setting, r, schedule_yes, phase, t)
+    #            print(phase + 1, r, t, no_sched, sched, no_sched == sched)
 
     plot_planning.create(setting, plan_all)
 

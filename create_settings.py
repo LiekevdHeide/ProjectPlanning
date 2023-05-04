@@ -22,7 +22,7 @@ def create(
     num_shifts = args.T
     lead_time = args.L
     num_phases = args.N
-    work_per_phase = tuple(np.full(num_phases, 10))
+    work_per_phase = tuple(np.full(num_phases, 5))
     phase_costs = tuple(np.full(num_phases, 10))
     number_shifts = num_shifts + lead_time
     shift_costs = tuple(np.full(number_shifts + 1, 2))
