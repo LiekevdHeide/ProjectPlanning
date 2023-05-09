@@ -9,8 +9,7 @@ import SettingsDictionary
 sDict = SettingsDictionary.Settings
 
 
-# @functools.cache  # alternative for higher Python versions (3.9)
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def f_func(
     setting: tuple, remaining: int, schedule: tuple[int], phase: int, t: int
 ) -> float:
@@ -27,7 +26,7 @@ def f_func(
     return g_func(setting, remaining, schedule, phase, t)[0]
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def g_func(
     setting: tuple, remaining: int, schedule_no: tuple[int], phase: int, t: int
 ) -> (float, int):
@@ -47,17 +46,17 @@ def g_func(
     return min(cost_array), cost_array.index(min(cost_array))
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def l_1(setting: tuple, phase: int) -> float:
     return sum(setting[sDict.PhaseC][phase:setting[sDict.NumPhases]])
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def l_2(setting: tuple, time: int) -> float:
     return (setting[sDict.Deadline] - time) * -10
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def h_func(
     setting: tuple, remaining: int, schedule: tuple[int], phase: int, t: int
 ) -> float:
@@ -69,7 +68,7 @@ def h_func(
     return k_func(setting, remaining, schedule, phase, t)
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def k_func(
     setting: tuple, remaining: int, schedule: tuple[int], n: int, t: int
 ) -> float:

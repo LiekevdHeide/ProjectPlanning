@@ -18,6 +18,8 @@ import modelForm2
 import plot_planning
 
 sDict = SettingsDictionary.Settings
+
+
 # np.set_printoptions(threshold=np.inf)
 
 
@@ -51,7 +53,7 @@ def main():
 
     # Look at the weird no schedule blocks:
     schedule_no = scheduled_shifts
-    schedule_yes = list(scheduled_shifts)
+    schedule_yes = np.zeros(setting[sDict.LeadTime] + 1, dtype=int)
     schedule_yes[setting[sDict.LeadTime]] = 1
     schedule_yes = tuple(schedule_yes)
 
@@ -73,17 +75,22 @@ def main():
         for r in range(2, setting[sDict.WorkPerPhase][phase] + 1):
             for t in range(1, setting[sDict.Deadline]):
                 # check if yes/no costs correct:
-                if cost_yes[phase, r - 1, t - 1] != min(cost_yes[phase, r - 2, t], cost_no[phase, r - 2, t]):
-                    print(f"phase {phase} rem. {r - 1} t {t - 1} costY={cost_yes[phase, r - 1, t - 1]}" +
+                cost_y = cost_yes[phase, r - 1, t - 1]
+                cost_n = cost_no[phase, r - 1, t - 1]
+
+                min_cost_y = min(cost_yes[phase, r - 2, t], cost_no[phase, r - 2, t])
+                min_cost_n = min(cost_yes[phase, r - 1, t], cost_no[phase, r - 1, t])
+
+                if cost_y != min_cost_y:
+                    print(f"{phase=} rem. {r - 1} t {t - 1} costY={cost_y}"
                           f" at rem. {r - 2}, t {t} yes: {cost_yes[phase, r - 2, t]} no: {cost_no[phase, r - 2, t]} ")
-                if cost_no[phase, r - 1, t - 1] != min(cost_yes[phase, r - 1, t], cost_no[phase, r - 1, t]):
-                    print(f"phase {phase} rem. {r - 1} t {t - 1} costN={cost_no[phase, r - 1, t - 1]}" +
+
+                if cost_n != min_cost_n:
+                    print(f"{phase=} rem. {r - 1} t {t - 1} costN={cost_n}"
                           f" at rem. {r - 1}, t {t} yes: {cost_yes[phase, r - 1, t]} no: {cost_no[phase, r - 1, t]} ")
 
-                correct_yes[phase, r - 1, t - 1] = cost_yes[phase, r - 1, t - 1] == min(cost_yes[phase, r - 2, t],
-                                                             cost_no[phase, r - 2, t])
-                correct_no[phase, r - 1, t - 1] = cost_no[phase, r - 1, t - 1] == min(cost_yes[phase, r - 1, t],
-                                                             cost_no[phase, r - 1, t])
+                correct_yes[phase, r - 1, t - 1] = cost_y == min_cost_y
+                correct_no[phase, r - 1, t - 1] = cost_n == min_cost_n
     print(correct_no)
     print(correct_yes)
 
