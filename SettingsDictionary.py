@@ -15,5 +15,5 @@ class Settings(IntEnum):
     NumPhases = 3
     WorkPerPhase = 4
     PhaseC = 5
-    E_Values = 6
+    E_values = 6
     E_probs = 7

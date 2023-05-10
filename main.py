@@ -40,67 +40,44 @@ def main():
 
     plan_all = np.zeros(
         (
+            setting[sDict.LeadTime] + 1,
             setting[sDict.NumPhases],
             setting[sDict.WorkPerPhase][0],
             setting[sDict.Deadline],
         ),
-        dtype=int,
+        # dtype=int,
     )
-    cost_no = np.copy(plan_all)
-    cost_yes = np.copy(plan_all)
-    correct_no = np.copy(plan_all)
-    correct_yes = np.copy(plan_all)
+    cost_as_returned = np.copy(plan_all)
 
-    # Look at the weird no schedule blocks:
-    schedule_no = scheduled_shifts
-    schedule_yes = np.zeros(setting[sDict.LeadTime] + 1, dtype=int)
-    schedule_yes[setting[sDict.LeadTime]] = 1
-    schedule_yes = tuple(schedule_yes)
+    for l in range(setting[sDict.LeadTime] + 1):
+        # this works for leadtime  = 1, otherwise need 2^L
+        schedule_no = np.zeros(setting[sDict.LeadTime] + 1, dtype=int)
+        schedule_no[0:l] = 1  # change this if L>1
+        schedule_yes = np.copy(schedule_no)
+        schedule_yes[setting[sDict.LeadTime]] = 1
+        schedule_no = tuple(schedule_no)
+        schedule_yes = tuple(schedule_yes)
 
-    for phase in range(setting[sDict.NumPhases]):
-        for r in range(1, setting[sDict.WorkPerPhase][phase] + 1):
-            plan = np.zeros(setting[sDict.Deadline], dtype=int)
-            cost = np.zeros(setting[sDict.Deadline])
-            for t in range(1, setting[sDict.Deadline] + 1):
-                cost[t - 1], plan[t - 1] = modelForm2.g_func(
-                    setting, r, scheduled_shifts, phase, t
-                )
-                plan_all[phase, r - 1, t - 1] = plan[t - 1]
-                cost_no[phase, r - 1, t - 1] = modelForm2.h_func(setting, r, schedule_no, phase, t)
-                cost_yes[phase, r - 1, t - 1] = setting[sDict.ShiftC][t + setting[sDict.LeadTime]]
-                cost_yes[phase, r - 1, t - 1] += modelForm2.h_func(setting, r, schedule_yes, phase, t)
-            print(f"phase:{phase + 1} work remaining: {r - 1}", plan, cost)
+        for phase in range(setting[sDict.NumPhases]):
+            for r in range(setting[sDict.WorkPerPhase][phase]):
+                for t in range(setting[sDict.Deadline]):
+                    cost, plan = modelForm2.g_func(
+                        setting, r + 1, schedule_no, phase, t + 1
+                    )
+                    plan_all[l, phase, r, t] = plan
+                    cost_as_returned[l, phase, r, t] = cost
+                    cost_no = modelForm2.h_func(setting, r + 1, schedule_no, phase, t + 1)
 
-    for phase in range(setting[sDict.NumPhases]):
-        for r in range(2, setting[sDict.WorkPerPhase][phase] + 1):
-            for t in range(1, setting[sDict.Deadline]):
-                # check if yes/no costs correct:
-                cost_y = cost_yes[phase, r - 1, t - 1]
-                cost_n = cost_no[phase, r - 1, t - 1]
+                    if t < setting[sDict.Deadline] - setting[sDict.LeadTime]:
+                        cost_yes = setting[sDict.ShiftC][t + setting[sDict.LeadTime]]
+                        cost_yes += modelForm2.h_func(setting, r + 1, schedule_yes, phase, t + 1)
+                    else:
+                        # not allowed to schedule, so increase costs
+                        cost_yes = cost_no + 1
 
-                min_cost_y = min(cost_yes[phase, r - 2, t], cost_no[phase, r - 2, t])
-                min_cost_n = min(cost_yes[phase, r - 1, t], cost_no[phase, r - 1, t])
-
-                if cost_y != min_cost_y:
-                    print(f"{phase=} rem. {r - 1} t {t - 1} costY={cost_y}"
-                          f" at rem. {r - 2}, t {t} yes: {cost_yes[phase, r - 2, t]} no: {cost_no[phase, r - 2, t]} ")
-
-                if cost_n != min_cost_n:
-                    print(f"{phase=} rem. {r - 1} t {t - 1} costN={cost_n}"
-                          f" at rem. {r - 1}, t {t} yes: {cost_yes[phase, r - 1, t]} no: {cost_no[phase, r - 1, t]} ")
-
-                correct_yes[phase, r - 1, t - 1] = cost_y == min_cost_y
-                correct_no[phase, r - 1, t - 1] = cost_n == min_cost_n
-    print(correct_no)
-    print(correct_yes)
-
-    # for phase in range(0, 1):  # setting[sDict.NumPhases]):
-    #    for r in range(1, setting[sDict.WorkPerPhase][phase] + 1):
-    #        for t in range(1, setting[sDict.Deadline] + 1):
-    #            no_sched = modelForm2.h_func(setting, r, schedule_no, phase, t)
-    #            sched = setting[sDict.ShiftC][t + setting[sDict.LeadTime]]
-    #            sched += modelForm2.h_func(setting, r, schedule_yes, phase, t)
-    #            print(phase + 1, r, t, no_sched, sched, no_sched == sched)
+                    # Change the plan to show if there is a difference in costs:
+                    if cost_no == cost_yes:
+                        plan_all[l, phase, r, t] = 0.5
 
     plot_planning.create(setting, plan_all)
 

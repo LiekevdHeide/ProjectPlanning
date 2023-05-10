@@ -76,9 +76,9 @@ def k_func(
     # Calculate the expected remaining cost using probs & values of epsilon
     cost = 0.0
     # for all values epsilon can take
-    for epsilon in range(len(setting[sDict.E_Values])):
+    for epsilon in range(len(setting[sDict.E_values])):
         # calculate the non-negative remaining work in case of this epsilon
-        rem_non_neg = max(remaining - setting[sDict.E_Values][epsilon], 0)
+        rem_non_neg = max(remaining - setting[sDict.E_values][epsilon], 0)
         if rem_non_neg == 0:
             if n < setting[sDict.NumPhases] - 1:
                 cost += setting[sDict.E_probs][epsilon] * (

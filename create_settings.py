@@ -23,9 +23,9 @@ def create(
     lead_time = args.L
     num_phases = args.N
     work_per_phase = tuple(np.full(num_phases, 5))
-    phase_costs = tuple(np.full(num_phases, 10))
+    phase_costs = tuple(np.full(num_phases, 12))
     number_shifts = num_shifts + lead_time
-    shift_costs = tuple(np.full(number_shifts + 1, 2))
+    shift_costs = tuple(np.full(number_shifts + 1, 1))
     epsilon_values = (1,)  # (0, 1, 2)
     epsilon_probs = (1.0,)  # (0.2, 0.6, 0.2)  # (1/3, 1/3, 1/3)
 
