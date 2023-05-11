@@ -10,8 +10,6 @@ def test_choice():
     # Create input
     input = Input()
     setting = create_settings.create(input)
-    setting[sDict.E_values] = (1,)
-    setting[sDict.E_probs] = (1.0,)
 
     plan_all = np.zeros(
         (
@@ -20,7 +18,6 @@ def test_choice():
             setting[sDict.WorkPerPhase][0],
             setting[sDict.Deadline],
         ),
-        # dtype=int,
     )
     cost_no = np.zeros(
         (
@@ -80,3 +77,4 @@ class Input:
         self.L = 1
         self.N = 2
         self.T = 10
+        self.deterministic = True

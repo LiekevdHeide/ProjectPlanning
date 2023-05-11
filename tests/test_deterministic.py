@@ -10,10 +10,8 @@ sDict = SettingsDictionary.Settings
 
 
 def test_deterministic_L0():
-    input = Input()
-    setting = create_settings.create(input)
-    setting[sDict.E_values] = (1,)
-    setting[sDict.E_probs] = (1.0,)
+    input_class = Input()
+    setting = create_settings.create(input_class)
     # create
     correct_no = np.zeros(
         (
@@ -33,11 +31,11 @@ def test_deterministic_L0():
                     cost_y = modelForm2.h_func(setting, r + 1, (0, 1), phase, t + 1)
                     cost_y += setting[sDict.ShiftC][t + setting[sDict.LeadTime]]
                     cost_n = modelForm2.h_func(setting, r + 1, (0, 0), phase, t + 1)
-                    min_cost_y, a = modelForm2.g_func(
+                    min_cost_y, trash = modelForm2.g_func(
                             setting, r + 1, (1,0), phase, t + 2
                         )
                     min_cost_y += setting[sDict.ShiftC][t + setting[sDict.LeadTime]]
-                    min_cost_n = modelForm2.g_func(
+                    min_cost_n, trash = modelForm2.g_func(
                         setting, r + 1, (0, 0), phase, t + 2
                     )
                     # min_cost_y = cost_as_returned[1, phase, r, t + 1]
@@ -70,3 +68,4 @@ class Input:
         self.L = 1
         self.N = 2
         self.T = 10
+        self.deterministic = True

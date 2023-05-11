@@ -15,12 +15,20 @@ def f_func(
 ) -> float:
     assert t > 0, f"Error: Input time t={t} should be greater than 0."
     # Did we finish?
-    if t == setting[sDict.Deadline] + 1:
-        # reached the deadline
-        return l_1(setting, phase)
+    # if (  # THIS BIT IS ADJUSTED FROM MODEL:
+    #     t == setting[sDict.Deadline] + 1
+    #     and phase == setting[sDict.NumPhases] - 1
+    #     and remaining == 0
+    # ):
+    #     print(f"just in time {l_2(setting, t)}")
+    #     return l_2(setting, t)
     if phase == setting[sDict.NumPhases] - 1 and remaining == 0:
         # completed all phases
         return l_2(setting, t)
+    if t == setting[sDict.Deadline] + 1:
+        # reached the deadline
+        return l_1(setting, phase)
+
 
     # Continue scheduling
     return g_func(setting, remaining, schedule, phase, t)[0]
@@ -48,21 +56,24 @@ def g_func(
 
 @functools.cache
 def l_1(setting: tuple, phase: int) -> float:
-    return sum(setting[sDict.PhaseC][phase:setting[sDict.NumPhases]])
+    return sum(setting[sDict.PhaseC][phase: setting[sDict.NumPhases]])
 
 
 @functools.cache
 def l_2(setting: tuple, time: int) -> float:
-    return (setting[sDict.Deadline] - time) * -10
+    # Finished previous time step -> time - 1
+    return (setting[sDict.Deadline] - (time - 1)) * -10
 
 
 @functools.cache
 def h_func(
     setting: tuple, remaining: int, schedule: tuple[int], phase: int, t: int
 ) -> float:
+    # roll the schedule to t + 1
     schedule = np.roll(schedule, -1)
     schedule = tuple(schedule)
-    if schedule[0] == 0:
+
+    if schedule[-1] == 0:
         return f_func(setting, remaining, schedule, phase, t + 1)
 
     return k_func(setting, remaining, schedule, phase, t)
@@ -92,11 +103,23 @@ def k_func(
                 )
             else:
                 cost += setting[sDict.E_probs][epsilon] * (
-                    f_func(setting, 0, schedule, n, t + 1,)
+                    f_func(
+                        setting,
+                        0,
+                        schedule,
+                        n,
+                        t + 1,
+                    )
                 )
         # calculate future cost if this epsilon indeed occurs
         else:
             cost += setting[sDict.E_probs][epsilon] * (
-                f_func(setting, rem_non_neg, schedule, n, t + 1,)
+                f_func(
+                    setting,
+                    rem_non_neg,
+                    schedule,
+                    n,
+                    t + 1,
+                )
             )
     return cost

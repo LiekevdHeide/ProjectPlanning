@@ -18,19 +18,24 @@ sDict = SettingsDictionary.Settings
 
 
 def create(setting, planning):
+    # create figure with subplots: numPhases x leadTime
     fig, axarr = plt.subplots(setting[sDict.NumPhases], setting[sDict.LeadTime] + 1)  # , sharex=True
-    fig.set_size_inches(5, 2.5 * setting[sDict.NumPhases])
+    # size of figure based on number of columns
+    fig.set_size_inches(5, 1.5 * setting[sDict.NumPhases])
     fig.suptitle(
         f"Schedule for each phase leadtime {setting[sDict.LeadTime]}",
         fontsize=16,
     )
+    # if leadtime = 0: only one column -> index is 1 value
     if setting[sDict.LeadTime] == 0:
         index = 0
     else:
         index = (0, 0)
+    # create one plot with name, so we can use its colors
     im = axarr[index].imshow(planning[0, 0], cmap=plt.cm.autumn, interpolation="none")
     for i in range(setting[sDict.NumPhases]):
         for j in range(setting[sDict.LeadTime] + 1):
+            # if leadtime = 0: only one column -> index is 1 value
             if setting[sDict.LeadTime] == 0:
                 index = (i,)
             else:
@@ -40,42 +45,49 @@ def create(setting, planning):
 
     for i in range(setting[sDict.NumPhases]):
         for j in range(setting[sDict.LeadTime] + 1):
+            # Index = location of subplot [x, y] coordinate
             if setting[sDict.LeadTime] == 0:
                 index = i
             else:
                 index = (i, j)
-            axarr[index].set_ylabel("Remaining work")
+            if j == 0:
+                axarr[index].set_ylabel("Remaining work")
             axarr[index].set_xlabel("Time")
             if setting[sDict.LeadTime] == 0:
                 axarr[index].set_title(f"Phase {i + 1}")
             if setting[sDict.LeadTime] == 1:
                 axarr[index].set_title(f"Phase {i + 1}, plan ({j},?)")
             axarr[index].invert_yaxis()
-            #    # Major ticks
+
+            # x labels
+            # Major ticks for the axis labels
             axarr[index].xaxis.set_major_locator(
                 mticker.MaxNLocator(min(10, setting[sDict.Deadline]), integer=True)
             )
+            # x label values
             ticks_loc = axarr[index].get_xticks().tolist()
             axarr[index].xaxis.set_major_locator(mticker.FixedLocator(ticks_loc))
             axarr[index].set_xticklabels([int(x + 1) for x in ticks_loc])
 
+            # y labels
+            # make sure it's not too cluttered
             axarr[index].yaxis.set_major_locator(
                 mticker.MaxNLocator(
                     min(5, setting[sDict.WorkPerPhase][i]), integer=True
                 )
             )
+            # y label values
             ticks_loc = axarr[index].get_yticks().tolist()
             axarr[index].yaxis.set_major_locator(mticker.FixedLocator(ticks_loc))
             axarr[index].set_yticklabels([int(y + 1) for y in ticks_loc])
 
-            # Minor ticks
+            # Minor ticks to add the gridlines
             axarr[index].set_yticks(
                 np.arange(0.5, setting[sDict.WorkPerPhase][i] - 1), minor=True
             )
             axarr[index].set_xticks(
                 np.arange(0.5, setting[sDict.Deadline] - 1), minor=True
             )
-
             # Gridlines based on minor ticks
             axarr[index].grid(which="minor", color="w", linestyle="-", linewidth=1.5)
             # Remove minor ticks
@@ -84,7 +96,7 @@ def create(setting, planning):
             )
 
     # get the colors of the values, according to the
-    # colormap used by imshow
+    # colormap used by imshow, used in plot[0,0]
     colors = [im.cmap(im.norm(value)) for value in [0, 0.5, 1]]
     # create a patch (proxy artist) for every color
     patches = [
