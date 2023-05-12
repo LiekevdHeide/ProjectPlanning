@@ -12,78 +12,64 @@ import timeit
 import argparse
 
 # own functions
-import create_settings
-import SettingsDictionary
 import modelForm2
 import plot_planning
 
-sDict = SettingsDictionary.Settings
-
-
-# np.set_printoptions(threshold=np.inf)
-
 
 def main():
-    # get experiment setting
+    # Get experiment setting.
     args = parse_inputs()
     stopwatch_start = timeit.default_timer()
 
-    # create setting and initial parameters
-    setting = create_settings.create(args)
-    remaining_work = setting[sDict.WorkPerPhase][0]  # 4
-    scheduled_shifts = tuple(np.zeros(setting[sDict.LeadTime] + 1, dtype=int))
-
-    # run algorithm
-    opt_cost = modelForm2.f_func(
-        setting, remaining_work, scheduled_shifts, phase=0, t=1
-    )
-
+    # Run algorithm.
+    setting, opt_cost = modelForm2.start_scheduling_model(args)
+    lead_time = setting.LeadTime
     plan_all = np.zeros(
         (
-            setting[sDict.LeadTime] + 1,
-            setting[sDict.NumPhases],
-            setting[sDict.WorkPerPhase][0],
-            setting[sDict.Deadline],
+            lead_time + 1,
+            setting.NumPhases,
+            setting.WorkPerPhase[0],
+            setting.Deadline,
         ),
     )
     cost_as_returned = np.copy(plan_all)
 
-    for l in range(setting[sDict.LeadTime] + 1):
+    for already_scheduled in range(lead_time + 1):
         # this works for leadtime  = 1, otherwise need 2^L
-        schedule_no = np.zeros(setting[sDict.LeadTime] + 1, dtype=int)
-        schedule_no[0:l] = 1  # change this if L>1
+        schedule_no = np.zeros(lead_time + 1, dtype=int)
+        schedule_no[0:already_scheduled] = 1  # change this if L>1
         schedule_yes = np.copy(schedule_no)
-        schedule_yes[setting[sDict.LeadTime]] = 1
+        schedule_yes[lead_time] = 1
         schedule_no = tuple(schedule_no)
         schedule_yes = tuple(schedule_yes)
 
-        for phase in range(setting[sDict.NumPhases]):
+        for phase in range(setting.NumPhases):
             # Ignore r = 0, since it is never reached except in phase N
-            for r in range(0, setting[sDict.WorkPerPhase][phase]):
-                for t in range(setting[sDict.Deadline]):
+            for r in range(0, setting.WorkPerPhase[phase]):
+                for t in range(setting.Deadline):
                     cost, plan = modelForm2.g_func(
-                        setting, r + 1, schedule_no, phase, t + 1
+                        r + 1, schedule_no, phase, t + 1
                     )
-                    plan_all[l, phase, r, t] = plan
-                    cost_as_returned[l, phase, r, t] = cost
-                    cost_no = modelForm2.h_func(setting, r + 1, schedule_no, phase, t + 1)
+                    plan_all[already_scheduled, phase, r, t] = plan
+                    cost_as_returned[already_scheduled, phase, r, t] = cost
+                    cost_no = modelForm2.h_func(
+                        r + 1, schedule_no, phase, t + 1
+                    )
 
-                    if t < setting[sDict.Deadline] - setting[sDict.LeadTime]:
-                        cost_yes = setting[sDict.ShiftC][t + setting[sDict.LeadTime]]
-                        cost_yes += modelForm2.h_func(setting, r + 1, schedule_yes, phase, t + 1)
+                    if t < setting.Deadline - lead_time:
+                        cost_yes = setting.ShiftC[t + lead_time]
+                        cost_yes += modelForm2.h_func(
+                            r + 1, schedule_yes, phase, t + 1)
                     else:
                         # not allowed to schedule, so increase costs
                         cost_yes = cost_no + 1
 
-                    # Change the plan to show if there is a difference in costs:
+                    # Change the plan to show indifference between
+                    # scheduling and not scheduling.
                     if cost_no == cost_yes:
-                        plan_all[l, phase, r, t] = 0.5
-                    if phase == setting[sDict.NumPhases] - 1 and r == 0 and l == 1:
-                        k_yes = modelForm2.k_func(setting, r + 1, (1, 0), phase, t + 1)
-                        k_yes += setting[sDict.ShiftC][t + setting[sDict.LeadTime]]
-                        in_k_yes = modelForm2.f_func(setting, 0, (1, 0), phase, t + 2)
-                        print(phase, r, t, cost_as_returned[l, phase, r, t], cost_yes, '=', k_yes, '=', in_k_yes, cost_no, plan_all[l, phase, r, t])
-    if setting[sDict.NumPhases] == 1:
+                        plan_all[already_scheduled, phase, r, t] = 0.5
+
+    if setting.NumPhases == 1:
         print(plan_all)
     else:
         plot_planning.create(setting, plan_all)
@@ -99,7 +85,16 @@ def parse_inputs():
     )
     parser.add_argument("-L", help="Lead time", type=int, required=True)
     parser.add_argument("-N", help="Number of phases", type=int, required=True)
-    parser.add_argument("-deterministic", help="Is this the deterministic special case?", action="store_true")
+    parser.add_argument(
+        "-deterministic", help="Is this the deterministic special case?",
+        action="store_true")
+    subparsers = parser.add_subparsers(help='Specify cost or default',
+                                       dest='cost_specified')
+    parser_specify_cost = subparsers.add_parser("yes", help="Specify cost")
+    parser_specify_cost.add_argument("-shiftC", type=float, required=True)
+    parser_specify_cost.add_argument("-phaseC", type=float, required=True)
+    parser_specify_cost.add_argument("-earlyC", type=float, required=True)
+
     return parser.parse_args()
 
 
