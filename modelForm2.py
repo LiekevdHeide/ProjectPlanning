@@ -9,15 +9,26 @@ import create_settings
 
 def start_scheduling_model(args):
     # Create setting and initial parameters.
-    global setting
+    # global setting
     setting = create_settings.create(args)
     remaining_work = setting.WorkPerPhase[0]  # 4
     scheduled_shifts = tuple(np.zeros(setting.LeadTime + 1, dtype=int))
-    return setting, f_func(remaining_work, scheduled_shifts, phase=0, t=1)
+    # if f_func.cache_info().currsize > 0:
+    #     f_func.cache_clear()
+    #     g_func.cache_clear()
+    #     l_1.cache_clear()
+    #     l_2.cache_clear()
+    #     h_func.cache_clear()
+    #     k_func.cache_clear()
+    return setting, f_func(
+        setting, remaining_work, scheduled_shifts, phase=0, t=1
+    )
 
 
 @functools.cache
-def f_func(remaining: int, schedule: tuple[int], phase: int, t: int) -> float:
+def f_func(
+    setting, remaining: int, schedule: tuple[int], phase: int, t: int
+) -> float:
     assert t > 0, f"Error: Input time t={t} should be greater than 0."
     # Did we finish?
     # if (  # THIS BIT IS ADJUSTED FROM MODEL:
@@ -29,63 +40,68 @@ def f_func(remaining: int, schedule: tuple[int], phase: int, t: int) -> float:
     #     return l_2(setting, t)
     if phase == setting.NumPhases - 1 and remaining == 0:
         # completed all phases
-        return l_2(t)
+        return l_2(setting, t)
     if t == setting.Deadline + 1:
         # reached the deadline
-        return l_1(phase)
+        return l_1(setting, phase)
 
     # Continue scheduling
-    return g_func(remaining, schedule, phase, t)[0]
+    return g_func(setting, remaining, schedule, phase, t)[0]
 
 
 @functools.cache
-def g_func(remaining: int, schedule: tuple[int], phase: int, t: int
+def g_func(
+    setting, remaining: int, schedule: tuple[int], phase: int, t: int
 ) -> (float, int):
     lead_time = setting.LeadTime
     if t > setting.Deadline - lead_time:
-        return h_func(remaining, schedule, phase, t), 0
+        return h_func(setting, remaining, schedule, phase, t), 0
 
     # Create the yes/no schedules, using all previously scheduled shifts.
-    schedule_yes = tuple(1 if i == lead_time else schedule[i] for i in
-                         range(len(schedule)))
-    schedule_no = tuple(0 if i == lead_time else schedule[i] for i in
-                        range(len(schedule)))
+    schedule_yes = tuple(
+        1 if i == lead_time else schedule[i] for i in range(len(schedule))
+    )
+    schedule_no = tuple(
+        0 if i == lead_time else schedule[i] for i in range(len(schedule))
+    )
 
     # array of (not scheduling, scheduling) at time t + lead time
     cost_array = (
-        h_func(remaining, schedule_no, phase, t),
-        setting.ShiftC[t + lead_time]
-        + h_func(remaining, schedule_yes, phase, t),
+        h_func(setting, remaining, schedule_no, phase, t),
+        setting.shiftC[t + lead_time]
+        + h_func(setting, remaining, schedule_yes, phase, t),
     )
     return min(cost_array), cost_array.index(min(cost_array))
 
 
 @functools.cache
-def l_1(phase: int) -> float:
-    return sum(setting.PhaseC[phase: setting.NumPhases])
+def l_1(setting, phase: int) -> float:
+    return sum(setting.phaseC[phase : setting.NumPhases])
 
 
 @functools.cache
-def l_2(time: int) -> float:
+def l_2(setting, time: int) -> float:
     # Finished previous time step -> time - 1
-    return (setting.Deadline - (time - 1)) * setting.EarlyC
+    return (setting.Deadline - (time - 1)) * setting.earlyC
 
 
 @functools.cache
-def h_func(remaining: int, schedule: tuple[int], phase: int, t: int
+def h_func(
+    setting, remaining: int, schedule: tuple[int], phase: int, t: int
 ) -> float:
     # roll the schedule to t + 1
     schedule = np.roll(schedule, -1)
     schedule = tuple(schedule)
 
     if schedule[-1] == 0:
-        return f_func(remaining, schedule, phase, t + 1)
+        return f_func(setting, remaining, schedule, phase, t + 1)
 
-    return k_func(remaining, schedule, phase, t)
+    return k_func(setting, remaining, schedule, phase, t)
 
 
 @functools.cache
-def k_func(remaining: int, schedule: tuple[int], n: int, t: int
+def k_func(
+    setting, remaining: int, schedule: tuple[int], n: int, t: int
 ) -> float:
     # work on current phase, if no work remaining continue on hext phase
     # Calculate the expected remaining cost using probs & values of epsilon
@@ -98,6 +114,7 @@ def k_func(remaining: int, schedule: tuple[int], n: int, t: int
             if n < setting.NumPhases - 1:
                 cost += setting.E_probs[epsilon] * (
                     f_func(
+                        setting,
                         setting.WorkPerPhase[n + 1],
                         schedule,
                         n + 1,
@@ -106,11 +123,11 @@ def k_func(remaining: int, schedule: tuple[int], n: int, t: int
                 )
             else:
                 cost += setting.E_probs[epsilon] * (
-                    f_func(0, schedule, n, t + 1)
+                    f_func(setting, 0, schedule, n, t + 1)
                 )
         # calculate future cost if this epsilon indeed occurs
         else:
             cost += setting.E_probs[epsilon] * (
-                f_func(rem_non_neg, schedule, n, t + 1)
+                f_func(setting, rem_non_neg, schedule, n, t + 1)
             )
     return cost

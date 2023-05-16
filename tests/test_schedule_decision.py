@@ -41,17 +41,19 @@ def test_choice():
             for r in range(setting.WorkPerPhase[phase]):
                 for t in range(setting.Deadline):
                     cost[t], plan[t] = modelForm2.g_func(
-                        r + 1, schedule_no, phase, t + 1
+                        setting, r + 1, schedule_no, phase, t + 1
                     )
                     plan_all[l, phase, r, t] = plan[t]
                     cost_as_returned[l, phase, r, t] = cost[t]
                     cost_no[l, phase, r, t] = modelForm2.h_func(
-                        r + 1, schedule_no, phase, t + 1
+                        setting, r + 1, schedule_no, phase, t + 1
                     )
                     if t < setting.Deadline - setting.LeadTime:
-                        cost_yes[l, phase, r, t] = setting.ShiftC[t + setting.LeadTime]
+                        cost_yes[l, phase, r, t] = setting.shiftC[
+                            t + setting.LeadTime
+                        ]
                         cost_yes[l, phase, r, t] += modelForm2.h_func(
-                            r + 1, schedule_yes, phase, t + 1
+                            setting, r + 1, schedule_yes, phase, t + 1
                         )
                     else:
                         # not allowed to schedule, so increase costs
@@ -59,8 +61,7 @@ def test_choice():
 
                     # check if the costs are correct
                     assert cost[t] == min(
-                        cost_no[l, phase, r, t],
-                        cost_yes[l, phase, r, t]
+                        cost_no[l, phase, r, t], cost_yes[l, phase, r, t]
                     ), (
                         f"Incorrect costs: {l=} {phase=} {r=} {t=}"
                         f" actual costs {cost[t]} schedule? {plan[t]}"
@@ -82,8 +83,8 @@ def test_choice():
 
 class Input:
     def __init__(self):
-        self.L = 1
-        self.N = 2
-        self.T = 10
+        self.LeadTime = 1
+        self.NumPhases = 2
+        self.Deadline = 10
         self.deterministic = True
-        self.cost_specified = 'no'
+        self.cost_specified = "no"

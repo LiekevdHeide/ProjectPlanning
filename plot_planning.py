@@ -21,9 +21,7 @@ def create(setting, planning):
         setting.NumPhases, setting.LeadTime + 1
     )  # , sharex=True
     # size of figure based on number of columns
-    fig.set_size_inches(
-        2.5 * (setting.LeadTime + 1), 1.8 * setting.NumPhases
-    )
+    fig.set_size_inches(2.5 * (setting.LeadTime + 1), 1.8 * setting.NumPhases)
     fig.suptitle(
         f"Schedule for each phase leadtime {setting.LeadTime}",
         fontsize=16,
@@ -68,9 +66,7 @@ def create(setting, planning):
             # x labels
             # Major ticks for the axis labels
             axarr[index].xaxis.set_major_locator(
-                mticker.MaxNLocator(
-                    min(10, setting.Deadline), integer=True
-                )
+                mticker.MaxNLocator(min(10, setting.Deadline), integer=True)
             )
             # x label values
             ticks_loc = axarr[index].get_xticks().tolist()
@@ -129,8 +125,7 @@ def create(setting, planning):
     plt.tight_layout()
     # fig.subplots_adjust(top=0.88) # in combination with tight_layout
     # plt.savefig(
-    #     f"Plot_schedule_{setting.WorkPerPhase][0]}"
-    #     f"{setting.LeadTime]}.pdf"
+    #     f"Plot_schedule_{setting.WorkPerPhase[0]}{setting.LeadTime}.pdf"
     # )
     plt.show()
     plt.close()
