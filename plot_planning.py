@@ -21,7 +21,8 @@ def create(setting, planning):
         setting.NumPhases, setting.LeadTime + 1
     )  # , sharex=True
     # size of figure based on number of columns
-    fig.set_size_inches(2.5 * (setting.LeadTime + 1), 1.8 * setting.NumPhases)
+    fig.set_size_inches(2.5 * (setting.LeadTime + 1),
+                        0.5 + 1.8 * setting.NumPhases)
     fig.suptitle(
         f"Schedule for each phase leadtime {setting.LeadTime}",
         fontsize=16,

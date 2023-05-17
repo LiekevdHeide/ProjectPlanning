@@ -26,11 +26,9 @@ class Settings:
 
 
 def create(args):
-    work_per_phase = tuple(np.full(args.NumPhases, 4
-                                   ))
+    work_per_phase = tuple(np.full(args.NumPhases, 5))
 
     if args.deterministic:
-
         epsilon_values = (1,)
         epsilon_probs = (1.0,)
     else:
@@ -56,7 +54,6 @@ def create(args):
         "earlyC": early_cost,
         "WorkPerPhase": work_per_phase,
     }
-
     inputs.update(
         {
             k: vars(args)[k]
