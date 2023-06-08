@@ -5,6 +5,7 @@ import functools
 import numpy as np
 
 import create_settings
+import calc_threshold
 
 
 def start_scheduling_model(args):
@@ -65,13 +66,23 @@ def g_func(
         0 if i == lead_time else schedule[i] for i in range(len(schedule))
     )
 
-    # array of (not scheduling, scheduling) at time t + lead time
-    cost_array = (
-        h_func(setting, remaining, schedule_no, phase, t),
-        setting.shiftC[t + lead_time]
-        + h_func(setting, remaining, schedule_yes, phase, t),
-    )
-    return min(cost_array), cost_array.index(min(cost_array))
+    if not setting.bench:
+        # array of (not scheduling, scheduling) at time t + lead time
+        cost_array = (
+            h_func(setting, remaining, schedule_no, phase, t),
+            setting.shiftC[t + lead_time]
+            + h_func(setting, remaining, schedule_yes, phase, t),
+        )
+        return min(cost_array), cost_array.index(min(cost_array))
+
+    # Calculate threshold measure
+    measure = calc_threshold.measure(setting, remaining, schedule, phase, t)
+
+    if setting.bench_LB <= measure <= setting.bench_UB:
+        return (setting.shiftC[t + lead_time]
+                + h_func(setting, remaining, schedule_yes, phase, t), 1)
+
+    return h_func(setting, remaining, schedule_no, phase, t), 0
 
 
 @functools.cache

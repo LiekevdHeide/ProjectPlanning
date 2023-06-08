@@ -1,6 +1,7 @@
 import numpy as np
 
 import modelForm2
+import calc_threshold
 
 
 def current(setting):
@@ -50,5 +51,36 @@ def current(setting):
                     # scheduling and not scheduling.
                     if cost_no == cost_yes:
                         plan_all[already_scheduled, phase, r, t] = 0.5
+
+    return plan_all
+
+
+def benchmark(setting):
+    # only works for lead time == 1.
+    plan_all = np.zeros(
+        (
+            setting.LeadTime + 1,
+            setting.NumPhases,
+            setting.WorkPerPhase[0],
+            setting.Deadline,
+        ),
+    )
+    for already in range(setting.LeadTime + 1):
+        for phase in range(setting.NumPhases):
+            # Ignore r = 0, since it is never reached except in phase N
+            for r in range(0, setting.WorkPerPhase[phase]):
+                for t in range(setting.Deadline):
+                    # Calculate the threshold measure
+                    measure = calc_threshold.measure(
+                        setting, r, (already,), phase, t
+                    )
+                    if r == 1:
+                        print(already, phase, t, measure)
+                    # What does the threshold policy say?
+                    if setting.bench_LB < measure < setting.bench_UB:
+                        plan_all[already, phase, r, t] = 1.0
+                    if (measure == setting.bench_LB
+                            or measure == setting.bench_UB):
+                        plan_all[already, phase, r, t] = 0.5
 
     return plan_all

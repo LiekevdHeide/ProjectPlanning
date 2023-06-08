@@ -7,7 +7,6 @@ Then, we use the function modelForm2.start_scheduling_model(args) to
  overall optimal costs of scheduling shifts with uncertainty and a lead time.
 Inputs of the form: -Deadline 20 -LeadTime 2 -NumPhases 5
 """
-import numpy as np
 import timeit
 import argparse
 
@@ -28,7 +27,10 @@ def main():
     print(f"Overall costs {opt_cost} and runtime {runtime}")
 
     # get scheduling decision for each time, remaining work, current schedule:
-    plan_all = get_schedule_decisions.current(setting)
+    if not setting.bench:
+        plan_all = get_schedule_decisions.current(setting)
+    else:
+        plan_all = get_schedule_decisions.benchmark(setting)
 
     # Print the current plan, or create a graph.
     if setting.NumPhases == 1:

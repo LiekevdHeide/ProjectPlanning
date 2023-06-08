@@ -24,9 +24,15 @@ class Settings:
     phaseC: tuple[float]
     earlyC: float
 
+    bench: bool
+    bench_LB: float
+    bench_UB: float
+
 
 def create(args):
     work_per_phase = tuple(np.full(args.NumPhases, 5))
+    benchmark = True
+    benchmark_bounds = (0.0, 2.0)
 
     if args.deterministic:
         epsilon_values = (1,)
@@ -53,6 +59,9 @@ def create(args):
         "phaseC": phase_costs,
         "earlyC": early_cost,
         "WorkPerPhase": work_per_phase,
+        "bench": benchmark,
+        "bench_LB": benchmark_bounds[0],
+        "bench_UB": benchmark_bounds[1],
     }
     inputs.update(
         {
@@ -84,6 +93,11 @@ def create(args):
     assert len(s_class.shiftC) == s_class.Deadline + 1, (
         f"Different length of cost per shift and number of available shifts:"
         f"{s_class.shiftC=}, {s_class.Deadline=}."
+    )
+
+    assert benchmark_bounds[0] <= benchmark_bounds[1], (
+        f"The lower bound of the benchmark exceeds the upper bound:"
+        f"LB: {benchmark_bounds[0]}, UB: {benchmark_bounds[1]}."
     )
 
     return s_class
