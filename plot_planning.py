@@ -23,10 +23,16 @@ def create(setting, planning):
     # size of figure based on number of columns
     fig.set_size_inches(2.5 * (setting.LeadTime + 1),
                         0.5 + 1.8 * setting.NumPhases)
-    fig.suptitle(
-        f"Schedule for each phase leadtime {setting.LeadTime}",
-        fontsize=16,
-    )
+    if setting.bench:
+        fig.suptitle(
+            f"Schedule for each phase leadtime {setting.LeadTime}, benchmark",
+            fontsize=16,
+        )
+    else:
+        fig.suptitle(
+            f"Schedule for each phase leadtime {setting.LeadTime}",
+            fontsize=16,
+        )
     # if leadtime = 0: only one column -> index is 1 value
     if setting.LeadTime == 0:
         index = 0

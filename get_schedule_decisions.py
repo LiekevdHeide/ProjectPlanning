@@ -69,7 +69,8 @@ def benchmark(setting):
         for phase in range(setting.NumPhases):
             # Ignore r = 0, since it is never reached except in phase N
             for r in range(0, setting.WorkPerPhase[phase]):
-                for t in range(setting.Deadline):
+                for t in range(setting.Deadline - setting.LeadTime):
+                    # if t < setting.Deadline - setting.LeadTime:
                     # Calculate the threshold measure
                     measure = calc_threshold.measure(
                         setting, r, (already,), phase, t

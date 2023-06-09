@@ -32,7 +32,7 @@ class Settings:
 def create(args):
     work_per_phase = tuple(np.full(args.NumPhases, 5))
     benchmark = True
-    benchmark_bounds = (0.0, 2.0)
+    benchmark_bounds = (0.0, 1.5)
 
     if args.deterministic:
         epsilon_values = (1,)
