@@ -69,4 +69,5 @@ class Input:
         self.NumPhases = 2
         self.Deadline = 10
         self.deterministic = True
-        self.cost_specified = "no"
+        self.cost_specified = 'no'
+        self.benchmark = False

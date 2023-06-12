@@ -34,7 +34,9 @@ class Input:
         self.NumPhases = 2
         self.Deadline = 10
         self.deterministic = True
-        self.cost_specified = "yes"
+        self.cost_specified = 'yes'
         self.shiftC = cost
+        self.shiftC_overtime = 2 * cost
         self.phaseC = 20
         self.earlyC = 10
+        self.benchmark = False

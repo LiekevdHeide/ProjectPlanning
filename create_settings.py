@@ -31,9 +31,6 @@ class Settings:
 
 def create(args):
     work_per_phase = tuple(np.full(args.NumPhases, 5))
-    benchmark = False
-    benchmark_bounds = (0.0, 1.0)
-
     if args.deterministic:
         epsilon_values = (1,)
         epsilon_probs = (1.0,)
@@ -41,16 +38,21 @@ def create(args):
         epsilon_values = (0, 1, 2)
         epsilon_probs = (0.2, 0.6, 0.2)  # (1/3, 1/3, 1/3)
 
-    if args.cost_specified == "yes":
-        shift_costs = tuple(np.full(args.Deadline + 1, args.shiftC))
+    if args.cost_specified == 'yes':
+        cost_var = np.full(args.Deadline + 1, args.shiftC)
+        cost_var[::2] = args.shiftC_overtime
+        shift_costs = tuple(cost_var)
         phase_costs = tuple(np.full(args.NumPhases, args.phaseC))
         early_cost = args.earlyC
     else:
-        shift_costs = tuple(np.full(args.Deadline + 1, 1))
+        cost_var = np.full(args.Deadline + 1, 1)
+        cost_var[::3] = 2
+        shift_costs = tuple(cost_var)
         phase_costs = tuple(
             np.full(args.NumPhases, 2 * work_per_phase[0] * shift_costs[0])
         )
         early_cost = -1  # 0
+    print(shift_costs)
 
     inputs = {
         "E_values": epsilon_values,
@@ -59,10 +61,16 @@ def create(args):
         "phaseC": phase_costs,
         "earlyC": early_cost,
         "WorkPerPhase": work_per_phase,
-        "bench": benchmark,
-        "bench_LB": benchmark_bounds[0],
-        "bench_UB": benchmark_bounds[1],
+        "bench": args.benchmark,
     }
+    if args.benchmark:
+        inputs.update(
+            {"bench_LB": args.bench_LB, "bench_UB": args.bench_UB, }
+        )
+    else:
+        inputs.update(
+            {"bench_LB": -10, "bench_UB": -20}
+        )
     inputs.update(
         {
             k: vars(args)[k]
@@ -94,10 +102,10 @@ def create(args):
         f"Different length of cost per shift and number of available shifts:"
         f"{s_class.shiftC=}, {s_class.Deadline=}."
     )
-
-    assert benchmark_bounds[0] <= benchmark_bounds[1], (
-        f"The lower bound of the benchmark exceeds the upper bound:"
-        f"LB: {benchmark_bounds[0]}, UB: {benchmark_bounds[1]}."
-    )
+    if s_class.bench:
+        assert s_class.bench_LB <= s_class.bench_UB, (
+            f"The lower bound of the benchmark exceeds the upper bound:"
+            f"LB: {s_class.bench_LB}, UB: {s_class.bench_UB}."
+        )
 
     return s_class

@@ -50,7 +50,7 @@ def test_choice():
                     )
                     if t < setting.Deadline - setting.LeadTime:
                         cost_yes[l, phase, r, t] = setting.shiftC[
-                            t + setting.LeadTime
+                            t + setting.LeadTime + 1
                         ]
                         cost_yes[l, phase, r, t] += modelForm2.h_func(
                             setting, r + 1, schedule_yes, phase, t + 1
@@ -87,4 +87,5 @@ class Input:
         self.NumPhases = 2
         self.Deadline = 10
         self.deterministic = True
-        self.cost_specified = "no"
+        self.cost_specified = 'no'
+        self.benchmark = False

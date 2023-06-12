@@ -5,7 +5,8 @@ The main() function imports the specific settings we use in the experiments.
 Then, we use the function modelForm2.start_scheduling_model(args) to
  start the recursive process with these settings as inputs to calculate the
  overall optimal costs of scheduling shifts with uncertainty and a lead time.
-Inputs of the form: -Deadline 20 -LeadTime 2 -NumPhases 5
+Inputs of the form: -Deadline 10 -LeadTime 1 -NumPhases 2
+     with optional: -benchmark -bench_LB 0.0 -bench_UB 1.0
 """
 import timeit
 import argparse
@@ -24,7 +25,7 @@ def main():
     # Run algorithm.
     setting, opt_cost = modelForm2.start_scheduling_model(args)
     runtime = timeit.default_timer() - stopwatch_start
-    print(f"Overall costs {opt_cost} and runtime {runtime}")
+    print(f"Overall costs {opt_cost} and runtime {runtime}, {setting.bench=}")
 
     # get scheduling decision for each time, remaining work, current schedule:
     if not setting.bench:
@@ -54,11 +55,22 @@ def parse_inputs():
         help="Is this the deterministic special case?",
         action="store_true",
     )
+    parser.add_argument(
+        "-benchmark", help="Use the threshold benchmark", action="store_true"
+    )
+    parser.add_argument(
+        "-bench_LB", help="Lower bound threshold policy", type=float
+    )
+    parser.add_argument(
+        "-bench_UB", help="Upper bound threshold policy", type=float
+    )
+
     subparsers = parser.add_subparsers(
         help="Specify cost or default", dest="cost_specified"
     )
     parser_specify_cost = subparsers.add_parser("yes", help="Specify cost")
     parser_specify_cost.add_argument("-shiftC", type=float, required=True)
+    parser_specify_cost.add_argument("-shiftC_overtime", type=float, required=True)
     parser_specify_cost.add_argument("-phaseC", type=float, required=True)
     parser_specify_cost.add_argument("-earlyC", type=float, required=True)
 
