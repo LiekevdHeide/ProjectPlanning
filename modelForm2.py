@@ -76,11 +76,16 @@ def g_func(
         return min(cost_array), cost_array.index(min(cost_array))
 
     # Calculate threshold measure
-    measure = calc_threshold.measure(setting, remaining, schedule, phase, t)
+    bench_schedule_decision = calc_threshold.measure(
+        setting, remaining, schedule, phase, t
+    )
 
-    if setting.bench_LB <= measure <= setting.bench_UB:
-        return (setting.shiftC[t + lead_time]
-                + h_func(setting, remaining, schedule_yes, phase, t), 1)
+    if bench_schedule_decision:
+        return (
+            setting.shiftC[t + lead_time]
+            + h_func(setting, remaining, schedule_yes, phase, t),
+            1,
+        )
 
     return h_func(setting, remaining, schedule_no, phase, t), 0
 

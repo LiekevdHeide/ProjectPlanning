@@ -27,7 +27,7 @@ def current(setting):
 
         for phase in range(setting.NumPhases):
             # Ignore r = 0, since it is never reached except in phase N
-            for r in range(0, setting.WorkPerPhase[phase]):
+            for r in range(setting.WorkPerPhase[phase]):
                 for t in range(setting.Deadline):
                     cost, plan = modelForm2.g_func(
                         setting, r + 1, schedule_no, phase, t + 1
@@ -65,6 +65,7 @@ def benchmark(setting):
             setting.Deadline,
         ),
     )
+    measure_val = plan_all.copy()
     for already in range(setting.LeadTime + 1):
         for phase in range(setting.NumPhases):
             # Ignore r = 0, since it is never reached except in phase N
@@ -72,16 +73,16 @@ def benchmark(setting):
                 for t in range(setting.Deadline - setting.LeadTime):
                     # if t < setting.Deadline - setting.LeadTime:
                     # Calculate the threshold measure
-                    measure = calc_threshold.measure(
-                        setting, r, (already,), phase, t
+                    schedule_choice = calc_threshold.measure(
+                            setting, r + 1, (already,), phase, t + 1
                     )
-                    if r == 1:
-                        print(already, phase, t, measure)
+                    measure_val[already, phase, r, t] = schedule_choice
                     # What does the threshold policy say?
-                    if setting.bench_LB < measure < setting.bench_UB:
+                    if schedule_choice:
                         plan_all[already, phase, r, t] = 1.0
-                    if (measure == setting.bench_LB
-                            or measure == setting.bench_UB):
-                        plan_all[already, phase, r, t] = 0.5
+                    # if (measure == setting.bench_LB
+                    #         or measure == setting.bench_UB):
+                    #     plan_all[already, phase, r, t] = 0.5
 
+    # print(measure_val)
     return plan_all

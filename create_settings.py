@@ -31,15 +31,15 @@ class Settings:
 
 def create(args):
     work_per_phase = tuple(np.full(args.NumPhases, 5))
-    benchmark = True
-    benchmark_bounds = (0.0, 1.5)
+    benchmark = False
+    benchmark_bounds = (0.0, 1.0)
 
     if args.deterministic:
         epsilon_values = (1,)
         epsilon_probs = (1.0,)
     else:
         epsilon_values = (0, 1, 2)
-        epsilon_probs = (0.05, 0.9, 0.05)  # (1/3, 1/3, 1/3)
+        epsilon_probs = (0.2, 0.6, 0.2)  # (1/3, 1/3, 1/3)
 
     if args.cost_specified == "yes":
         shift_costs = tuple(np.full(args.Deadline + 1, args.shiftC))
