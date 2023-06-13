@@ -5,6 +5,22 @@ import calc_threshold
 
 
 def current(setting):
+    # get scheduling decision for each time, remaining work, current schedule
+    # for the benchmark schedule choices OR the optimal choice from the MDP
+    if setting.bench:
+        return benchmark(setting)
+    else:
+        return optimal(setting)
+
+
+def optimal(setting):
+    """
+    Get scheduling decision for each time, remaining work, current schedule
+        using the optimal MDP scheduling choices.
+    Only works for lead time <= 1.
+    :param setting:
+    :return: array(leadTime + 1, num phases, remaining work, time)
+    """
     lead_time = setting.LeadTime
     plan_all = np.zeros(
         (
@@ -17,7 +33,7 @@ def current(setting):
     cost_as_returned = np.copy(plan_all)
 
     for already_scheduled in range(lead_time + 1):
-        # this works for leadtime  = 1, otherwise need 2^L
+        # this works for leadtime  <= 1, otherwise need 2^L
         schedule_no = np.zeros(lead_time + 1, dtype=int)
         schedule_no[0:already_scheduled] = 1  # change this if L>1
         schedule_yes = np.copy(schedule_no)
@@ -56,7 +72,13 @@ def current(setting):
 
 
 def benchmark(setting):
-    # only works for lead time == 1.
+    """
+    Get scheduling decision for each time, remaining work, current schedule
+        if the benchmark/threshold strategy is used.
+    only works for lead time <= 1.
+    :param setting:
+    :return: array(leadTime + 1, NumPhases, remaining work, T)
+    """
     plan_all = np.zeros(
         (
             setting.LeadTime + 1,

@@ -10,6 +10,7 @@ Inputs of the form: -Deadline 10 -LeadTime 1 -NumPhases 2
 """
 import timeit
 import argparse
+import sys
 
 # own functions
 import modelForm2
@@ -22,23 +23,24 @@ def main():
     args = parse_inputs()
     stopwatch_start = timeit.default_timer()
 
+    # print(sys.getrecursionlimit()) 1000
+    sys.setrecursionlimit(3000)  # sufficient for T=200
+
     # Run algorithm.
     setting, opt_cost = modelForm2.start_scheduling_model(args)
     runtime = timeit.default_timer() - stopwatch_start
     print(f"Overall costs {opt_cost} and runtime {runtime}, {setting.bench=}")
 
-    # get scheduling decision for each time, remaining work, current schedule:
-    if not setting.bench:
-        plan_all = get_schedule_decisions.current(setting)
-    else:
-        plan_all = get_schedule_decisions.benchmark(setting)
-
     # Print the current plan, or create a graph.
     if setting.NumPhases == 1:
+        # get scheduling decisions
+        plan_all = get_schedule_decisions.current(setting)
         print(plan_all)
-
     else:
-        plot_planning.create(setting, plan_all)
+        if setting.LeadTime <= 1:
+            # get scheduling decisions
+            plan_all = get_schedule_decisions.current(setting)
+            plot_planning.create(setting, plan_all)
 
 
 def parse_inputs():

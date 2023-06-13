@@ -40,19 +40,18 @@ def create(args):
 
     if args.cost_specified == 'yes':
         cost_var = np.full(args.Deadline + 1, args.shiftC)
-        cost_var[::2] = args.shiftC_overtime
+        cost_var[::3] = args.shiftC_overtime
         shift_costs = tuple(cost_var)
         phase_costs = tuple(np.full(args.NumPhases, args.phaseC))
         early_cost = args.earlyC
     else:
         cost_var = np.full(args.Deadline + 1, 1)
-        cost_var[::3] = 2
+        cost_var[::2] = 2
         shift_costs = tuple(cost_var)
         phase_costs = tuple(
             np.full(args.NumPhases, 2 * work_per_phase[0] * shift_costs[0])
         )
         early_cost = -1  # 0
-    print(shift_costs)
 
     inputs = {
         "E_values": epsilon_values,
