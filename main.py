@@ -29,7 +29,10 @@ def main():
     # Run algorithm.
     setting, opt_cost = modelForm2.start_scheduling_model(args)
     runtime = timeit.default_timer() - stopwatch_start
-    print(f"Overall costs {opt_cost} and runtime {runtime}, {setting.bench=}")
+    print(
+        f"Overall costs {opt_cost} and runtime {runtime}"
+        f", {setting.threshold_pol=}"
+    )
 
     # Print the current plan, or create a graph.
     if setting.NumPhases == 1:
@@ -46,35 +49,39 @@ def main():
 def parse_inputs():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-Deadline", help="Number of shifts available", type=int, required=True
+        "--Deadline",
+        help="Number of shifts available",
+        type=int,
+        required=True,
     )
-    parser.add_argument("-LeadTime", help="Lead time", type=int, required=True)
     parser.add_argument(
-        "-NumPhases", help="Number of phases", type=int, required=True
+        "--LeadTime", help="Lead time", type=int, required=True
     )
     parser.add_argument(
-        "-deterministic",
+        "--NumPhases", help="Number of phases", type=int, required=True
+    )
+    parser.add_argument(
+        "--work_per_phase",
+        help="Amount of work per phase (equal for all phases",
+        type=int,
+        default=5,
+    )
+    parser.add_argument(
+        "--deterministic",
         help="Is this the deterministic special case?",
         action="store_true",
     )
     parser.add_argument(
-        "-benchmark", help="Use the threshold benchmark", action="store_true"
-    )
-    parser.add_argument(
-        "-bench_LB", help="Lower bound threshold policy", type=float
-    )
-    parser.add_argument(
-        "-bench_UB", help="Upper bound threshold policy", type=float
+        "--threshold_pol",
+        help="Use the threshold benchmark",
+        action="store_true",
     )
 
-    subparsers = parser.add_subparsers(
-        help="Specify cost or default", dest="cost_specified"
-    )
-    parser_specify_cost = subparsers.add_parser("yes", help="Specify cost")
-    parser_specify_cost.add_argument("-shiftC", type=float, required=True)
-    parser_specify_cost.add_argument("-shiftC_overtime", type=float, required=True)
-    parser_specify_cost.add_argument("-phaseC", type=float, required=True)
-    parser_specify_cost.add_argument("-earlyC", type=float, required=True)
+    parser.add_argument("--shiftC", type=float, default=1)
+    parser.add_argument("--shiftC_overtime", type=float, default=2)
+    parser.add_argument("--overtime_freq", type=int, default=0)
+    parser.add_argument("--phaseC", type=float, default=10)
+    parser.add_argument("--earlyC", type=float, default=-1)
 
     return parser.parse_args()
 

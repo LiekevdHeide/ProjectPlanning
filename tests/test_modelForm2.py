@@ -32,11 +32,12 @@ class Input:
     def __init__(self, cost):
         self.LeadTime = 1
         self.NumPhases = 2
+        self.work_per_phase = 5
         self.Deadline = 10
         self.deterministic = True
-        self.cost_specified = 'yes'
         self.shiftC = cost
         self.shiftC_overtime = 2 * cost
+        self.overtime_freq = 2
         self.phaseC = 20
         self.earlyC = 10
-        self.benchmark = False
+        self.threshold_pol = False

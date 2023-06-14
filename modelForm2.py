@@ -66,7 +66,7 @@ def g_func(
         0 if i == lead_time else schedule[i] for i in range(len(schedule))
     )
 
-    if not setting.bench:
+    if not setting.threshold_pol:
         # array of (not scheduling, scheduling) at time t + lead time
         cost_array = (
             h_func(setting, remaining, schedule_no, phase, t),
@@ -76,11 +76,11 @@ def g_func(
         return min(cost_array), cost_array.index(min(cost_array))
 
     # Calculate threshold measure
-    bench_schedule_decision = calc_threshold.measure(
+    threshold_schedule_decision = calc_threshold.measure(
         setting, remaining, schedule, phase, t
     )
 
-    if bench_schedule_decision:
+    if threshold_schedule_decision:
         return (
             setting.shiftC[t + lead_time]
             + h_func(setting, remaining, schedule_yes, phase, t),

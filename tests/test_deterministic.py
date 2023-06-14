@@ -1,5 +1,6 @@
 """
-Test function to verify correct costs and decisions for the deterministic special case.
+Test function to verify correct costs and decisions
+for the deterministic special case.
 """
 import numpy as np
 
@@ -67,7 +68,13 @@ class Input:
     def __init__(self):
         self.LeadTime = 1
         self.NumPhases = 2
+        self.work_per_phase = 5
         self.Deadline = 10
         self.deterministic = True
-        self.cost_specified = 'no'
-        self.benchmark = False
+        self.threshold_pol = False
+
+        self.shiftC = 1
+        self.shiftC_overtime = 1
+        self.overtime_freq = 1
+        self.phaseC = 10
+        self.earlyC = -1
