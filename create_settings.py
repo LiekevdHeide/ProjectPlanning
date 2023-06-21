@@ -102,4 +102,8 @@ def create(args):
             f"LB: {s_class.bench_LB}, UB: {s_class.bench_UB}."
         )
 
+    assert s_class.earlyC <= 0, (
+        f"The cost of being early should be non-positive (reward). "
+        f"Current value: {s_class.earlyC=}."
+    )
     return s_class

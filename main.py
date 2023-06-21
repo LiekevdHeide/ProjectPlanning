@@ -30,7 +30,7 @@ def main():
     setting, opt_cost = modelForm2.start_scheduling_model(args)
     runtime = timeit.default_timer() - stopwatch_start
     print(
-        f"Overall costs {opt_cost} and runtime {runtime}"
+        f"Overall costs {opt_cost:.3f} and runtime {runtime:.2f}"
         f", {setting.threshold_pol=}"
     )
 
