@@ -40,10 +40,10 @@ def main():
         plan_all = get_schedule_decisions.current(setting)
         print(plan_all)
     else:
-        if setting.LeadTime <= 1:
-            # get scheduling decisions
-            plan_all = get_schedule_decisions.current(setting)
-            plot_planning.create(setting, plan_all)
+        # if setting.LeadTime <= 1:
+        # get scheduling decisions
+        plan_all = get_schedule_decisions.current(setting)
+        plot_planning.create(setting, plan_all)
 
 
 def parse_inputs():

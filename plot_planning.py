@@ -16,46 +16,45 @@ matplotlib.rcParams["font.family"] = "Helvetica"
 
 
 def create(setting, planning):
-    # create figure with subplots: numPhases x leadTime
+    if setting.LeadTime > 3:
+        "This instance is too large to plot."
+        return
+    # Create figure with subplots: numPhases x leadTime
     fig, axarr = plt.subplots(
-        setting.NumPhases, setting.LeadTime + 1
+        setting.NumPhases, max(1, 2**setting.LeadTime)
     )  # , sharex=True
     # size of figure based on number of columns
-    fig.set_size_inches(2.5 * (setting.LeadTime + 1),
+    fig.set_size_inches(2.5 * max(1, 2**setting.LeadTime),
                         0.5 + 1.8 * setting.NumPhases)
+    # Create title for combined plot.
+    title = f"Schedule for each phase leadtime {setting.LeadTime}"
     if setting.threshold_pol:
-        fig.suptitle(
-            f"Schedule for each phase leadtime {setting.LeadTime}, benchmark",
-            fontsize=16,
-        )
-    else:
-        fig.suptitle(
-            f"Schedule for each phase leadtime {setting.LeadTime}",
-            fontsize=16,
-        )
-    # if leadtime = 0: only one column -> index is 1 value
+        title += f", benchmark"
+    fig.suptitle(title, fontsize=16)
+
+    # if lead time = 0: only one column -> index is 1 value
     if setting.LeadTime == 0:
         index = 0
     else:
         index = (0, 0)
     # create one plot with name, so we can use its colors
     im = axarr[index].imshow(
-        planning[0, 0], cmap=plt.cm.autumn, interpolation="none"
+        planning[0, 0], cmap=plt.cm.Purples, interpolation="none"
     )
     for i in range(setting.NumPhases):
-        for j in range(setting.LeadTime + 1):
-            # if leadtime = 0: only one column -> index is 1 value
+        for j in range(max(1, 2**setting.LeadTime)):
+            # if lead time = 0: only one column -> index is 1 value
             if setting.LeadTime == 0:
                 index = (i,)
             else:
                 index = (i, j)
             if sum(index) != 0:
                 axarr[index].imshow(
-                    planning[j, i], cmap=plt.cm.autumn, interpolation="none"
+                    planning[j, i], cmap=plt.cm.Purples, interpolation="none"
                 )
 
     for i in range(setting.NumPhases):
-        for j in range(setting.LeadTime + 1):
+        for j in range(max(1, 2**setting.LeadTime)):
             # Index = location of subplot [x, y] coordinate
             if setting.LeadTime == 0:
                 index = i
@@ -66,8 +65,11 @@ def create(setting, planning):
             axarr[index].set_xlabel("Time")
             if setting.LeadTime == 0:
                 axarr[index].set_title(f"Phase {i + 1}")
-            if setting.LeadTime == 1:
-                axarr[index].set_title(f"Phase {i + 1}, plan ({j},?)")
+            if setting.LeadTime > 1:
+                plan = f"{j:0{setting.LeadTime}b}"[::-1]
+                axarr[index].set_title(
+                    f"Phase {i + 1}, plan {plan}?"
+                )
             axarr[index].invert_yaxis()
 
             # x labels

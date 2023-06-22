@@ -37,7 +37,7 @@ def create(args):
         epsilon_probs = (1.0,)
     else:
         epsilon_values = (0, 1, 2)
-        epsilon_probs = (0.2, 0.6, 0.2)  # (1/3, 1/3, 1/3)
+        epsilon_probs = (0.1, 0.8, 0.1)  # (0.2, 0.6, 0.2))
 
     cost_var = np.full(args.Deadline + 1, args.shiftC)
     if args.overtime_freq > 0:

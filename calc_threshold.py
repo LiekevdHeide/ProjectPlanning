@@ -31,23 +31,23 @@ def measure(
     #             return True
 
     # B:
-    val = remaining   # + sum(setting.WorkPerPhase[phase:setting.NumPhases - 1])
-    val -= sum(schedule[:setting.LeadTime])
-    val /= (setting.Deadline - (t + setting.LeadTime - 1))
-    val /= setting.shiftC[t + setting.LeadTime] * setting.shiftC[t + setting.LeadTime]
-    if val > 0.03:
-        return True
+    # val = remaining + sum(setting.WorkPerPhase[phase:setting.NumPhases - 1])
+    # val -= sum(schedule[:setting.LeadTime])
+    # val /= (setting.Deadline - (t + setting.LeadTime - 1))
+    # val /= setting.shiftC[t + setting.LeadTime] ** 2
+    # if val > 0.1:
+    #     return True
 
     # new idea:
-    # val_this_phase = remaining - sum(schedule[:setting.LeadTime])
-    # val_this_phase /= setting.Deadline - (t + setting.LeadTime - 1)
-    # if val_this_phase > 1.0:  # or val_this_phase < 0.0:
-    #     return False
-    # if setting.shiftC[t + setting.LeadTime] < setting.overtimeC:
-    #     # print(val_this_phase)
-    #     return True
-    # elif val_this_phase > 0.5:  # frequency == 2 -> 0.5?, frequency == 3 -> 0.6/0.7 f==4 -> 0.6
-    #     return True
+    val_this_phase = remaining - sum(schedule[:setting.LeadTime])
+    val_this_phase /= setting.Deadline - (t + setting.LeadTime - 1)
+    if val_this_phase > 1.0:  # or val_this_phase <= 0.0:
+        return False
+    if setting.shiftC[t + setting.LeadTime] < setting.overtimeC:
+        # print(val_this_phase)
+        return True
+    elif val_this_phase > 0.3:  # frequency == 2 -> 0.5?, frequency == 3 -> 0.6/0.7 f==4 -> 0.6
+        return True
 
     return False
     # return True

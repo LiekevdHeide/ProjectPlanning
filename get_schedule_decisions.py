@@ -24,7 +24,7 @@ def optimal(setting):
     lead_time = setting.LeadTime
     plan_all = np.zeros(
         (
-            lead_time + 1,
+            max(1, 2 ** lead_time),
             setting.NumPhases,
             setting.WorkPerPhase[0],
             setting.Deadline,
@@ -32,14 +32,12 @@ def optimal(setting):
     )
     cost_as_returned = np.copy(plan_all)
 
-    for already_scheduled in range(lead_time + 1):
-        # this works for leadtime  <= 1, otherwise need 2^L
-        schedule_no = np.zeros(lead_time + 1, dtype=int)
-        schedule_no[0:already_scheduled] = 1  # change this if L>1
-        schedule_yes = np.copy(schedule_no)
-        schedule_yes[lead_time] = 1
-        schedule_no = tuple(schedule_no)
-        schedule_yes = tuple(schedule_yes)
+    for already in range(max(1, 2 ** lead_time)):
+        # Create binary form of number, fill with zeros and reverse order
+        str_sched_no = f"{already:0{lead_time}b}"[::-1] + "0"
+        str_sched_yes = f"{already:0{lead_time}b}"[::-1] + "1"
+        schedule_no = tuple([int(s) for s in str_sched_no])
+        schedule_yes = tuple([int(s) for s in str_sched_yes])
 
         for phase in range(setting.NumPhases):
             # Ignore r = 0, since it is never reached except in phase N
@@ -48,8 +46,8 @@ def optimal(setting):
                     cost, plan = modelForm2.g_func(
                         setting, r + 1, schedule_no, phase, t + 1
                     )
-                    plan_all[already_scheduled, phase, r, t] = plan
-                    cost_as_returned[already_scheduled, phase, r, t] = cost
+                    plan_all[already, phase, r, t] = plan
+                    cost_as_returned[already, phase, r, t] = cost
                     cost_no = modelForm2.h_func(
                         setting, r + 1, schedule_no, phase, t + 1
                     )
@@ -66,7 +64,7 @@ def optimal(setting):
                     # Change the plan to show indifference between
                     # scheduling and not scheduling.
                     if cost_no == cost_yes:
-                        plan_all[already_scheduled, phase, r, t] = 0.5
+                        plan_all[already, phase, r, t] = 0.5
 
     return plan_all
 
@@ -81,22 +79,25 @@ def benchmark(setting):
     """
     plan_all = np.zeros(
         (
-            setting.LeadTime + 1,
+            max(1, 2**setting.LeadTime),
             setting.NumPhases,
             setting.WorkPerPhase[0],
             setting.Deadline,
         ),
     )
     measure_val = plan_all.copy()
-    for already in range(setting.LeadTime + 1):
+    for already in range(max(1, 2**setting.LeadTime)):  # setting.LeadTime + 1)
+        prev_sched = f"{already:0{setting.LeadTime}b}"[::-1]
+        prev_sched = [int(s) for s in prev_sched]
         for phase in range(setting.NumPhases):
             # Ignore r = 0, since it is never reached except in phase N
             for r in range(0, setting.WorkPerPhase[phase]):
                 for t in range(setting.Deadline - setting.LeadTime):
                     # if t < setting.Deadline - setting.LeadTime:
                     # Calculate the threshold measure
+                    # (already,)
                     schedule_choice = calc_threshold.measure(
-                            setting, r + 1, (already,), phase, t + 1
+                            setting, r + 1, prev_sched, phase, t + 1
                     )
                     measure_val[already, phase, r, t] = schedule_choice
                     # What does the threshold policy say?
@@ -106,5 +107,4 @@ def benchmark(setting):
                     #         or measure == setting.bench_UB):
                     #     plan_all[already, phase, r, t] = 0.5
 
-    # print(measure_val)
     return plan_all
