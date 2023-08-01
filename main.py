@@ -16,6 +16,7 @@ import sys
 import modelForm2
 import plot_planning
 import get_schedule_decisions
+import print_output
 
 
 def main():
@@ -44,6 +45,8 @@ def main():
         # get scheduling decisions
         plan_all = get_schedule_decisions.current(setting)
         plot_planning.create(setting, plan_all)
+
+    print_output.write_header("name", setting)
 
 
 def parse_inputs():
@@ -75,6 +78,11 @@ def parse_inputs():
         "--threshold_pol",
         help="Use the threshold benchmark",
         action="store_true",
+    )
+    parser.add_argument(
+        "--threshold_val",
+        help="Threshold value if the threshold benchmark is used.",
+        type=float, default=-1
     )
 
     parser.add_argument("--shiftC", type=float, default=1)

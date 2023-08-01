@@ -26,8 +26,9 @@ class Settings:
     earlyC: float
 
     threshold_pol: bool
-    bench_LB: float
-    bench_UB: float
+    threshold_val: float
+    # bench_LB: float
+    # bench_UB: float
 
 
 def create(args):
@@ -55,20 +56,13 @@ def create(args):
         "WorkPerPhase": work_per_phase,
         "overtimeC": args.shiftC_overtime,
     }
-    if args.threshold_pol:
-        inputs.update(
-            {
-                "bench_LB": 0.0,
-                "bench_UB": 1.0,
-            }
-        )
-    else:
-        inputs.update({"bench_LB": -10, "bench_UB": -20})
+
+    print(args, vars(args).keys)
     inputs.update(
         {
             k: vars(args)[k]
             for k in vars(args).keys()
-            & {"LeadTime", "Deadline", "NumPhases", "threshold_pol"}
+            & {"LeadTime", "Deadline", "NumPhases", "threshold_pol", "threshold_val"}
         }
     )
     s_class = Settings(**inputs)
@@ -96,10 +90,13 @@ def create(args):
         f"Different length of cost per shift and number of available shifts:"
         f"{s_class.shiftC=}, {s_class.Deadline=}."
     )
+
     if s_class.threshold_pol:
-        assert s_class.bench_LB <= s_class.bench_UB, (
-            f"The lower bound of the benchmark exceeds the upper bound:"
-            f"LB: {s_class.bench_LB}, UB: {s_class.bench_UB}."
+        assert s_class.threshold_val > 0, (
+            f"The threshold value should exceed 0 (and is an input arg)."
+        )
+        assert s_class.threshold_val < 1, (
+            f"The threshold value should be smaller than 1."
         )
 
     assert s_class.earlyC <= 0, (
