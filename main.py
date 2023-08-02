@@ -22,6 +22,13 @@ import print_output
 def main():
     # Get experiment setting.
     args = parse_inputs()
+    output_dir = "X:/My Documents/Project planning/Trial_outputs/"
+
+    # for th in range(1, 20):
+    th = 0.14  # /= 50
+    args.threshold_val = th
+    output_name = f"output_OPT"
+
     stopwatch_start = timeit.default_timer()
 
     # print(sys.getrecursionlimit()) 1000
@@ -34,19 +41,23 @@ def main():
         f"Overall costs {opt_cost:.3f} and runtime {runtime:.2f}"
         f", {setting.threshold_pol=}"
     )
+    # print output to csv
+    print_output.write_setting(output_dir + output_name, setting, opt_cost, runtime)
 
     # Print the current plan, or create a graph.
-    if setting.NumPhases == 1:
-        # get scheduling decisions
-        plan_all = get_schedule_decisions.current(setting)
-        print(plan_all)
-    else:
-        # if setting.LeadTime <= 1:
-        # get scheduling decisions
-        plan_all = get_schedule_decisions.current(setting)
-        plot_planning.create(setting, plan_all)
+    if args.show_plot:
+        if setting.NumPhases == 1:
+            # get scheduling decisions
+            plan_all = get_schedule_decisions.current(setting)
+            print(plan_all)
+        else:
+            # if setting.LeadTime <= 1:
+            # get scheduling decisions
+            plan_all = get_schedule_decisions.current(setting)
+            plot_planning.create(setting, plan_all)
 
-    print_output.write_header("name", setting)
+    # Combine all output files in output_dir and combine in 1 file with name
+    # print_output.combine_files(output_dir, "Combined/combi_all1")
 
 
 def parse_inputs():
@@ -90,6 +101,8 @@ def parse_inputs():
     parser.add_argument("--overtime_freq", type=int, default=0)
     parser.add_argument("--phaseC", type=float, default=10)
     parser.add_argument("--earlyC", type=float, default=-1)
+
+    parser.add_argument("--show_plot", action="store_true", help="Show schedule plot.")
 
     return parser.parse_args()
 

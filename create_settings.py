@@ -27,8 +27,6 @@ class Settings:
 
     threshold_pol: bool
     threshold_val: float
-    # bench_LB: float
-    # bench_UB: float
 
 
 def create(args):
