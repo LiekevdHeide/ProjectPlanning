@@ -23,11 +23,10 @@ def main():
     # Get experiment setting.
     args = parse_inputs()
     # output_dir = "X:/My Documents/Project planning/Trial_outputs/"
-    output_dir = "C:/Users/Gebruiker/Documents/Project planning/"
 
     # print(sys.getrecursionlimit()) 1000
     sys.setrecursionlimit(3000)  # sufficient for T=200
-    output_name = "output_OPT"
+    output_name = args.output_name
 
     if args.threshold_pol_basic or args.threshold_pol_cost:
         opt_cost_overall = float('inf')
@@ -66,7 +65,7 @@ def main():
 
     # print output to csv
     print_output.write_setting(
-        output_dir + output_name, best_setting, opt_cost, runtime
+        output_name, best_setting, opt_cost, runtime
     )
 
     # Print the current plan, or create a graph.
@@ -134,6 +133,10 @@ def parse_inputs():
 
     parser.add_argument(
         "--show_plot", action="store_true", help="Show schedule plot."
+    )
+    parser.add_argument(
+        "--output_name", required=True,
+        help="Name of output file, including directory."
     )
 
     return parser.parse_args()
