@@ -25,27 +25,6 @@ def measure_basic(
         setting, remaining: int, schedule: tuple[int], phase: int, t: int
 ) -> bool:
 
-    # Works very well for 1 shiftC type
-    # If multiple, needs a diff threshold for each phase.
-    # for p in range(phase, setting.NumPhases):
-    #     val = remaining + sum(setting.WorkPerPhase[phase:p])
-    #     val -= sum(schedule[:setting.LeadTime])
-    #     val /= setting.Deadline - (t + setting.LeadTime - 1)
-    # # # #     # val *= setting.shiftC[t + setting.LeadTime]
-    # does the opposite of what we want
-    # # # #     # val /= setting.shiftC[t + setting.LeadTime]
-    # does not help: still > 0
-    # # # #     # Only do expensive shift if REALLY need it -> near UB
-    # # #     if setting.bench_LB < val <= setting.bench_UB:
-    # # #         return True
-    #     if setting.shiftC[t + setting.LeadTime] == setting.overtimeC:
-    #         # val -= 0.2
-    #         if 0.1 + setting.bench_LB < val <= setting.bench_UB:
-    #             return True
-    #     else:
-    #         if setting.bench_LB < val <= setting.bench_UB:
-    #             return True
-
     # B:
     val = remaining + sum(setting.WorkPerPhase[phase:setting.NumPhases - 1])
     val -= sum(schedule[:setting.LeadTime])
@@ -82,3 +61,24 @@ def measure_cost(
     #     return True
     #
     # return False
+
+    # Works very well for 1 shiftC type
+    # If multiple, needs a diff threshold for each phase.
+    # for p in range(phase, setting.NumPhases):
+    #     val = remaining + sum(setting.WorkPerPhase[phase:p])
+    #     val -= sum(schedule[:setting.LeadTime])
+    #     val /= setting.Deadline - (t + setting.LeadTime - 1)
+    # # # #     # val *= setting.shiftC[t + setting.LeadTime]
+    # does the opposite of what we want
+    # # # #     # val /= setting.shiftC[t + setting.LeadTime]
+    # does not help: still > 0
+    # # # #     # Only do expensive shift if REALLY need it -> near UB
+    # # #     if setting.bench_LB < val <= setting.bench_UB:
+    # # #         return True
+    #     if setting.shiftC[t + setting.LeadTime] == setting.overtimeC:
+    #         # val -= 0.2
+    #         if 0.1 + setting.bench_LB < val <= setting.bench_UB:
+    #             return True
+    #     else:
+    #         if setting.bench_LB < val <= setting.bench_UB:
+    #             return True

@@ -22,7 +22,9 @@ import print_output
 def main():
     # Get experiment setting.
     args = parse_inputs()
-    output_dir = "X:/My Documents/Project planning/Trial_outputs/"
+    # output_dir = "X:/My Documents/Project planning/Trial_outputs/"
+    output_dir = "C:/Users/Gebruiker/Documents/Project planning/"
+
     # print(sys.getrecursionlimit()) 1000
     sys.setrecursionlimit(3000)  # sufficient for T=200
     output_name = "output_OPT"
@@ -48,22 +50,23 @@ def main():
             if opt_cost < opt_cost_overall:
                 opt_output = current_output
                 opt_cost_overall = opt_cost
+                best_setting = setting
     else:
         stopwatch_start = timeit.default_timer()
-        setting, opt_cost = modelForm2.start_scheduling_model(args)
+        best_setting, opt_cost = modelForm2.start_scheduling_model(args)
         runtime = timeit.default_timer() - stopwatch_start
         opt_output = (
             f"Overall cost {opt_cost:.3f} and runtime {runtime:.2f}"
-            f", {setting.threshold_pol_basic=}, "
-            f"{setting.threshold_pol_cost=}, "
-            f"{setting.threshold_val=}"
+            f", {best_setting.threshold_pol_basic=}, "
+            f"{best_setting.threshold_pol_cost=}, "
+            f"{best_setting.threshold_val=}"
         )
 
     print(opt_output, args)
 
     # print output to csv
     print_output.write_setting(
-        output_dir + output_name, setting, opt_cost, runtime
+        output_dir + output_name, best_setting, opt_cost, runtime
     )
 
     # Print the current plan, or create a graph.
