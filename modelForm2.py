@@ -66,7 +66,7 @@ def g_func(
         0 if i == lead_time else schedule[i] for i in range(len(schedule))
     )
 
-    if not setting.threshold_pol:
+    if not (setting.threshold_pol_basic or setting.threshold_pol_cost):
         # array of (not scheduling, scheduling) at time t + lead time
         cost_array = (
             h_func(setting, remaining, schedule_no, phase, t),
@@ -92,7 +92,7 @@ def g_func(
 
 @functools.cache
 def l_1(setting, phase: int) -> float:
-    return sum(setting.phaseC[phase : setting.NumPhases])
+    return sum(setting.phaseC[phase: setting.NumPhases])
 
 
 @functools.cache

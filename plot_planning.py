@@ -28,8 +28,10 @@ def create(setting, planning):
                         0.5 + 1.8 * setting.NumPhases)
     # Create title for combined plot.
     title = f"Schedule for each phase leadtime {setting.LeadTime}"
-    if setting.threshold_pol:
-        title += f", benchmark"
+    if setting.threshold_pol_basic:
+        title += ", benchmark_b"
+    elif setting.threshold_pol_cost:
+        title += ", benchmark_c"
     fig.suptitle(title, fontsize=16)
 
     # if lead time = 0: only one column -> index is 1 value

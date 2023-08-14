@@ -23,26 +23,48 @@ def main():
     # Get experiment setting.
     args = parse_inputs()
     output_dir = "X:/My Documents/Project planning/Trial_outputs/"
-
-    # for th in range(1, 20):
-    th = 0.14  # /= 50
-    args.threshold_val = th
-    output_name = f"output_OPT"
-
-    stopwatch_start = timeit.default_timer()
-
     # print(sys.getrecursionlimit()) 1000
     sys.setrecursionlimit(3000)  # sufficient for T=200
+    output_name = "output_OPT"
 
-    # Run algorithm.
-    setting, opt_cost = modelForm2.start_scheduling_model(args)
-    runtime = timeit.default_timer() - stopwatch_start
-    print(
-        f"Overall costs {opt_cost:.3f} and runtime {runtime:.2f}"
-        f", {setting.threshold_pol=}"
-    )
+    if args.threshold_pol_basic or args.threshold_pol_cost:
+        opt_cost_overall = float('inf')
+        for th in range(1, 50):
+            th /= 50  # th=0.14
+            args.threshold_val = th
+
+            stopwatch_start = timeit.default_timer()
+
+            # Run algorithm.
+            setting, opt_cost = modelForm2.start_scheduling_model(args)
+            runtime = timeit.default_timer() - stopwatch_start
+            current_output = (
+                f"Overall costs {opt_cost:.3f} and runtime {runtime:.2f}"
+                f", {setting.threshold_pol_basic=}, "
+                f"{setting.threshold_pol_cost=}, "
+                f"{setting.threshold_val=}"
+            )
+
+            if opt_cost < opt_cost_overall:
+                opt_output = current_output
+                opt_cost_overall = opt_cost
+    else:
+        stopwatch_start = timeit.default_timer()
+        setting, opt_cost = modelForm2.start_scheduling_model(args)
+        runtime = timeit.default_timer() - stopwatch_start
+        opt_output = (
+            f"Overall cost {opt_cost:.3f} and runtime {runtime:.2f}"
+            f", {setting.threshold_pol_basic=}, "
+            f"{setting.threshold_pol_cost=}, "
+            f"{setting.threshold_val=}"
+        )
+
+    print(opt_output, args)
+
     # print output to csv
-    print_output.write_setting(output_dir + output_name, setting, opt_cost, runtime)
+    print_output.write_setting(
+        output_dir + output_name, setting, opt_cost, runtime
+    )
 
     # Print the current plan, or create a graph.
     if args.show_plot:
@@ -86,8 +108,13 @@ def parse_inputs():
         action="store_true",
     )
     parser.add_argument(
-        "--threshold_pol",
-        help="Use the threshold benchmark",
+        "--threshold_pol_basic",
+        help="Use the basic threshold benchmark",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--threshold_pol_cost",
+        help="Use the cost-based threshold benchmark",
         action="store_true",
     )
     parser.add_argument(
@@ -102,7 +129,9 @@ def parse_inputs():
     parser.add_argument("--phaseC", type=float, default=10)
     parser.add_argument("--earlyC", type=float, default=-1)
 
-    parser.add_argument("--show_plot", action="store_true", help="Show schedule plot.")
+    parser.add_argument(
+        "--show_plot", action="store_true", help="Show schedule plot."
+    )
 
     return parser.parse_args()
 

@@ -7,7 +7,7 @@ import calc_threshold
 def current(setting):
     # get scheduling decision for each time, remaining work, current schedule
     # for the benchmark schedule choices OR the optimal choice from the MDP
-    if setting.threshold_pol:
+    if setting.threshold_pol_basic or setting.threshold_pol_cost:
         return benchmark(setting)
     else:
         return optimal(setting)
