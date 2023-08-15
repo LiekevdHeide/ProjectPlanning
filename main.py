@@ -22,7 +22,6 @@ import print_output
 def main():
     # Get experiment setting.
     args = parse_inputs()
-    # output_dir = "X:/My Documents/Project planning/Trial_outputs/"
 
     # print(sys.getrecursionlimit()) 1000
     sys.setrecursionlimit(3000)  # sufficient for T=200
@@ -30,7 +29,7 @@ def main():
 
     if args.threshold_pol_basic or args.threshold_pol_cost:
         opt_cost_overall = float('inf')
-        for th in range(1, 50):
+        for th in range(1, 25):
             th /= 50  # th=0.14
             args.threshold_val = th
 
@@ -52,10 +51,10 @@ def main():
                 best_setting = setting
     else:
         stopwatch_start = timeit.default_timer()
-        best_setting, opt_cost = modelForm2.start_scheduling_model(args)
+        best_setting, opt_cost_overall = modelForm2.start_scheduling_model(args)
         runtime = timeit.default_timer() - stopwatch_start
         opt_output = (
-            f"Overall cost {opt_cost:.3f} and runtime {runtime:.2f}"
+            f"Overall cost {opt_cost_overall:.3f} and runtime {runtime:.2f}"
             f", {best_setting.threshold_pol_basic=}, "
             f"{best_setting.threshold_pol_cost=}, "
             f"{best_setting.threshold_val=}"
@@ -65,20 +64,20 @@ def main():
 
     # print output to csv
     print_output.write_setting(
-        output_name, best_setting, opt_cost, runtime
+        output_name, best_setting, opt_cost_overall, runtime
     )
 
     # Print the current plan, or create a graph.
     if args.show_plot:
-        if setting.NumPhases == 1:
+        if best_setting.NumPhases == 1:
             # get scheduling decisions
-            plan_all = get_schedule_decisions.current(setting)
+            plan_all = get_schedule_decisions.current(best_setting)
             print(plan_all)
         else:
             # if setting.LeadTime <= 1:
             # get scheduling decisions
-            plan_all = get_schedule_decisions.current(setting)
-            plot_planning.create(setting, plan_all)
+            plan_all = get_schedule_decisions.current(best_setting)
+            plot_planning.create(best_setting, plan_all)
 
     # Combine all output files in output_dir and combine in 1 file with name
     # print_output.combine_files(output_dir, "Combined/combi_all1")
