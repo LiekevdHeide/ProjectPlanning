@@ -45,8 +45,11 @@ def create(args):
         cost_var[:: args.overtime_freq] = args.shiftC_overtime
     shift_costs = tuple(cost_var)
     shift_costs_avg = sum(cost_var) / (args.Deadline + 1)
-    phase_costs = tuple(np.full(args.NumPhases, args.phaseC))
     early_cost = args.earlyC
+    # Set all cost of not finishing a phase and double the final cost.
+    phase_costs = np.full(args.NumPhases, args.phaseC)
+    phase_costs[-1] *= 2
+    phase_costs = tuple(phase_costs)
 
     inputs = {
         "E_values": epsilon_values,
