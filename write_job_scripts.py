@@ -11,14 +11,16 @@ phase_c         [15, 15, 30]
 overtime_f      2
 T               15 + L + alpha * Var(epsilon)
 alpha           1, 5
-!! early_cost!!
+early_cost!!    -0.5
 """
+import math
 
 JOBSCRIPT = """#!/bin/bash
 
-#SBATCH --time=10:00:00
-#SBATCH --mem=2G
+#SBATCH --time=1:00:00
+#SBATCH --mem=5G
 #SBATCH --partition=regular
+#SBATCH --chdir=../..
 #SBATCH --output={slurm}
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=l.m.van.der.heide@rug.nl
@@ -38,28 +40,29 @@ ARGUMENTS = ("--Deadline {deadline} "
              "--earlyC {cost_early} "
              "{policy_type} "
              "--output_name {output_name} "
+             "--epsilon_probs {epsilon_probs} "
              )
 
 
 def experiment_one():
     # Check if python version ok (or if there is a newer one)
-    mainLocation = "/home4/p279495/ProjectPlanning/"
-    location = mainLocation + "Experiments/"
+    location = "./Experiments/"
     num_phases = 3
     work = 5
     prob_options = [[0, 1, 0], [0.1, 0.8, 0.1], [0.2, 0.6, 0.2]]
     epsilon = [0, 1, 2]
     pol_options = ["", "--threshold_pol_basic", "--threshold_pol_cost"]
-    for L in range(0, 15, 14):
+    for L in range(0, 29, 14):
         for cost_overtime in range(2, 6, 3):
             for p in range(3):
-                for alpha in range(1, 6, 4):
+                for alpha in range(2):
                     for pol in range(3):
-                        var_epsilon = sum(
-                            prob_options[p][i] * (epsilon[i] - 1) ** 2 for i in
-                            range(len(epsilon)))
+                        # var_epsilon = sum(
+                        #     prob_options[p][i] * (epsilon[i] - 1) ** 2 for i in
+                        #     range(len(epsilon)))
                         deadline = num_phases * work + L
-                        deadline += alpha * var_epsilon
+                        deadline += alpha * work
+                        deadline = math.ceil(deadline)
 
                         job_name = f"{L}_{cost_overtime}_{p}_{alpha}_{pol}"
                         print(job_name)
@@ -76,11 +79,12 @@ def experiment_one():
                                 freq=2,
                                 cost_phase=15,
                                 cost_early=-0.5,
+                                epsilon_probs=f"{prob_options[p][0]} {prob_options[p][1]} {prob_options[p][2]}", 
                                 policy_type=pol_options[pol],
                                 name=job_name,
-                                output_name=location + "Output_test/" + job_name + ".txt",
+                                output_name=location + "Output_22-8_noA/" + job_name,
                                 slurm=location + "slurm/slurm-%j.out",
-                                main=mainLocation + "ProjectPlanning/main.py",
+                                main= "main.py",
                             )
 
                             script.write(JOBSCRIPT.format(**data))

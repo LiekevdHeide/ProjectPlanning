@@ -26,6 +26,7 @@ def main():
     # print(sys.getrecursionlimit()) 1000
     sys.setrecursionlimit(3000)  # sufficient for T=200
     output_name = args.output_name
+    print(args.epsilon_probs)
 
     if args.threshold_pol_basic or args.threshold_pol_cost:
         opt_cost_overall = float('inf')
@@ -107,6 +108,11 @@ def parse_inputs():
         "--deterministic",
         help="Is this the deterministic special case?",
         action="store_true",
+    )
+    parser.add_argument(
+        "--epsilon_probs",
+        nargs='+', type=float,
+        help="Array with probabilities of epsilon: (0, 1, 2) resp.",
     )
     parser.add_argument(
         "--threshold_pol_basic",

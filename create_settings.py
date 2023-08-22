@@ -38,8 +38,9 @@ def create(args):
         epsilon_probs = (1.0,)
     else:
         epsilon_values = (0, 1, 2)
-        epsilon_probs = (0.1, 0.8, 0.1)  # (0.2, 0.6, 0.2))
+        epsilon_probs = args.epsilon_probs  # (0.2, 0.6, 0.2))
 
+    epsilon_probs = tuple(epsilon_probs)
     cost_var = np.full(args.Deadline + 1, args.shiftC)
     if args.overtime_freq > 0:
         cost_var[:: args.overtime_freq] = args.shiftC_overtime

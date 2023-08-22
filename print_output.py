@@ -19,10 +19,12 @@ def write_setting(file_name, setting, solution_cost, runtime):
             print("This file already exists and is non-empty.")
         else:
             # write header
+            csvfile.write("Filename;")
             csvfile.write(";".join(vars(setting).keys()))
             csvfile.write(";" + "solution_cost;runtime" + "\n")
 
         # write values
+        csvfile.write(f"{file_name};")
         csvfile.write(";".join(f'{value}' for key, value in vars(setting).items()))
         csvfile.write(f";{solution_cost};{runtime}\n")
 
