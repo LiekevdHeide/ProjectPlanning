@@ -8,6 +8,7 @@ authors = ["Lieke van der Heide <liekeheide@gmail.com>"]
 python = "^3.9, <3.12"
 numpy = "^1.23.3"
 scipy = "^1.9.1"
+pandas = "^2.0.3"
 
 [tool.black]
 line-length = 79

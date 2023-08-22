@@ -24,7 +24,7 @@ JOBSCRIPT = """#!/bin/bash
 #SBATCH --mail-user=l.m.van.der.heide@rug.nl
 #SBATCH --job-name={name}
 
-module load Python/3.9.5-GCCcore-10.3.0
+module load Python/3.10.4-GCCcore-11.3.0
 poetry run python {main} """
 
 ARGUMENTS = ("--Deadline {deadline} "
@@ -43,7 +43,7 @@ ARGUMENTS = ("--Deadline {deadline} "
 
 def experiment_one():
     # Check if python version ok (or if there is a newer one)
-    mainLocation = "/home/p279495/ProjectPlanning/"
+    mainLocation = "/home4/p279495/ProjectPlanning/"
     location = mainLocation + "Experiments/"
     num_phases = 3
     work = 5
@@ -64,8 +64,8 @@ def experiment_one():
                         job_name = f"{L}_{cost_overtime}_{p}_{alpha}_{pol}"
                         print(job_name)
                         with open(
-                                location + "scripts/job" + job_name + ".shw",
-                                ) as script:
+                                location + "scripts/job" + job_name + ".sh",
+                                "w") as script:
                             data = dict(
                                 deadline=deadline,
                                 L=L,
@@ -78,9 +78,9 @@ def experiment_one():
                                 cost_early=-0.5,
                                 policy_type=pol_options[pol],
                                 name=job_name,
-                                output=location + "Outputs2-11/" + job_name + "Out.txt",
+                                output_name=location + "Output_test/" + job_name + ".txt",
                                 slurm=location + "slurm/slurm-%j.out",
-                                main=mainLocation + "main.py",
+                                main=mainLocation + "ProjectPlanning/main.py",
                             )
 
                             script.write(JOBSCRIPT.format(**data))
