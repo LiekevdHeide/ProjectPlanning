@@ -29,19 +29,20 @@ JOBSCRIPT = """#!/bin/bash
 module load Python/3.10.4-GCCcore-11.3.0
 poetry run python {main} """
 
-ARGUMENTS = ("--Deadline {deadline} "
-             "--LeadTime {L} "
-             "--NumPhases {num_phases} "
-             "--work_per_phase {work} "
-             "--shiftC {shift_cost} "
-             "--shiftC_overtime {cost_overtime} "
-             "--overtime_freq {freq} "
-             "--phaseC {cost_phase} "
-             "--earlyC {cost_early} "
-             "{policy_type} "
-             "--output_name {output_name} "
-             "--epsilon_probs {epsilon_probs} "
-             )
+ARGUMENTS = (
+    "--Deadline {deadline} "
+    "--LeadTime {L} "
+    "--NumPhases {num_phases} "
+    "--work_per_phase {work} "
+    "--shiftC {shift_cost} "
+    "--shiftC_overtime {cost_overtime} "
+    "--overtime_freq {freq} "
+    "--phaseC {cost_phase} "
+    "--earlyC {cost_early} "
+    "{policy_type} "
+    "--output_name {output_name} "
+    "--epsilon_probs {epsilon_probs} "
+)
 
 
 def experiment_one():
@@ -50,16 +51,12 @@ def experiment_one():
     num_phases = 3
     work = 5
     prob_options = [[0, 1, 0], [0.1, 0.8, 0.1], [0.2, 0.6, 0.2]]
-    epsilon = [0, 1, 2]
     pol_options = ["", "--threshold_pol_basic", "--threshold_pol_cost"]
     for L in range(0, 29, 14):
         for cost_overtime in range(2, 6, 3):
             for p in range(3):
                 for alpha in range(2):
                     for pol in range(3):
-                        # var_epsilon = sum(
-                        #     prob_options[p][i] * (epsilon[i] - 1) ** 2 for i in
-                        #     range(len(epsilon)))
                         deadline = num_phases * work + L
                         deadline += alpha * work
                         deadline = math.ceil(deadline)
@@ -67,8 +64,8 @@ def experiment_one():
                         job_name = f"{L}_{cost_overtime}_{p}_{alpha}_{pol}"
                         print(job_name)
                         with open(
-                                location + "scripts/job" + job_name + ".sh",
-                                "w") as script:
+                            location + "scripts/job" + job_name + ".sh", "w"
+                        ) as script:
                             data = dict(
                                 deadline=deadline,
                                 L=L,
@@ -79,19 +76,26 @@ def experiment_one():
                                 freq=2,
                                 cost_phase=15,
                                 cost_early=-0.5,
-                                epsilon_probs=f"{prob_options[p][0]} {prob_options[p][1]} {prob_options[p][2]}", 
+                                epsilon_probs=f"{prob_options[p][0]} "
+                                              f"{prob_options[p][1]} "
+                                              f"{prob_options[p][2]}",
                                 policy_type=pol_options[pol],
                                 name=job_name,
-                                output_name=location + "Output_22-8_noA/" + job_name,
+                                output_name=location
+                                + "Output_22-8_noA/"
+                                + job_name,
                                 slurm=location + "slurm/slurm-%j.out",
-                                main= "main.py",
+                                main="main.py",
                             )
 
                             script.write(JOBSCRIPT.format(**data))
                             script.write(ARGUMENTS.format(**data))
                         with open(
-                                location + "scripts/totalJobs.txt", "a") as allScripts:
-                            allScripts.write("sbatch job" + job_name + ".sh \n")
+                            location + "scripts/totalJobs.txt", "a"
+                        ) as allScripts:
+                            allScripts.write(
+                                "sbatch job" + job_name + ".sh \n"
+                            )
 
 
 if __name__ == "__main__":

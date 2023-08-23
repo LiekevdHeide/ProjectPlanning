@@ -25,7 +25,9 @@ def write_setting(file_name, setting, solution_cost, runtime):
 
         # write values
         csvfile.write(f"{file_name};")
-        csvfile.write(";".join(f'{value}' for key, value in vars(setting).items()))
+        csvfile.write(
+            ";".join(f'{value}' for key, value in vars(setting).items())
+        )
         csvfile.write(f";{solution_cost};{runtime}\n")
 
 

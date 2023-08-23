@@ -15,7 +15,7 @@ import sys
 # own functions
 import modelForm2
 # import plot_planning
-import get_schedule_decisions
+# import get_schedule_decisions
 import print_output
 
 
@@ -29,7 +29,7 @@ def main():
     print(args.epsilon_probs)
 
     if args.threshold_pol_basic or args.threshold_pol_cost:
-        opt_cost_overall = float('inf')
+        opt_cost_all = float('inf')
         for th in range(1, 25):
             th /= 50  # th=0.14
             args.threshold_val = th
@@ -46,16 +46,16 @@ def main():
                 f"{setting.threshold_val=}"
             )
 
-            if opt_cost < opt_cost_overall:
+            if opt_cost < opt_cost_all:
                 opt_output = current_output
-                opt_cost_overall = opt_cost
+                opt_cost_all = opt_cost
                 best_setting = setting
     else:
         stopwatch_start = timeit.default_timer()
-        best_setting, opt_cost_overall = modelForm2.start_scheduling_model(args)
+        best_setting, opt_cost_all = modelForm2.start_scheduling_model(args)
         runtime = timeit.default_timer() - stopwatch_start
         opt_output = (
-            f"Overall cost {opt_cost_overall:.3f} and runtime {runtime:.2f}"
+            f"Overall cost {opt_cost_all:.3f} and runtime {runtime:.2f}"
             f", {best_setting.threshold_pol_basic=}, "
             f"{best_setting.threshold_pol_cost=}, "
             f"{best_setting.threshold_val=}"
@@ -65,7 +65,7 @@ def main():
 
     # print output to csv
     print_output.write_setting(
-        output_name, best_setting, opt_cost_overall, runtime
+        output_name, best_setting, opt_cost_all, runtime
     )
 
     # Print the current plan, or create a graph.
