@@ -53,11 +53,13 @@ def experiment_one():
     prob_options = [[0, 1, 0], [0.1, 0.8, 0.1], [0.2, 0.6, 0.2]]
     lead_times = [0, 2, 14]
     pol_options = ["", "--threshold_pol_basic", "--threshold_pol_cost"]
+    number_experiments = 0
     for L in range(len(lead_times)):
         for cost_overtime in range(2, 6, 3):
             for p in range(3):
                 for alpha in range(2):
                     for pol in range(3):
+                        number_experiments += 1
                         deadline = num_phases * work
                         deadline *= 2  # frequency
                         deadline += alpha * work  + lead_times[L]
@@ -65,9 +67,9 @@ def experiment_one():
                         mem = 10
                         if lead_times[L] == 0 and pol == 0:
                             mem = 10
-                        if lead_times[L] == 2 and pol == 0:
+                        if lead_times[L]:
                             mem = 20
-                        if lead_times[L] == 14 and pol == 0:
+                        if lead_times[L] == 14:
                             mem = 40
                         if lead_times[L] == 28 and pol == 0:
                             mem = 200
@@ -108,6 +110,7 @@ def experiment_one():
                             allScripts.write(
                                 "sbatch job" + job_name + ".sh \n"
                             )
+    print(f"Total number of experiments is {number_experiments}.")
 
 
 if __name__ == "__main__":

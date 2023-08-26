@@ -4,20 +4,20 @@ Input: -f file name (including directory)
 """
 import argparse
 import pandas as pd
-import matplotlib
-import matplotlib.pyplot as plt
+# import matplotlib
+# import matplotlib.pyplot as plt
 from scipy import stats
 
-matplotlib.rcParams["text.usetex"] = True
-matplotlib.rcParams["font.family"] = "Helvetica"
-matplotlib.rcParams["font.size"] = 10
-matplotlib.rcParams["axes.titlesize"] = "large"
-matplotlib.rcParams["xtick.labelsize"] = "small"
-matplotlib.rcParams["ytick.labelsize"] = "small"
-matplotlib.rcParams["legend.fontsize"] = "small"
-# matplotlib.rcParams["lines.linewidth"] = np.sqrt(16)
+# matplotlib.rcParams["text.usetex"] = True
+# matplotlib.rcParams["font.family"] = "Helvetica"
+# matplotlib.rcParams["font.size"] = 10
+# matplotlib.rcParams["axes.titlesize"] = "large"
+# matplotlib.rcParams["xtick.labelsize"] = "small"
+# matplotlib.rcParams["ytick.labelsize"] = "small"
+# matplotlib.rcParams["legend.fontsize"] = "small"
+# # matplotlib.rcParams["lines.linewidth"] = np.sqrt(16)
 
-plt.rcParams["figure.figsize"] = (3.2, 2.4)
+# plt.rcParams["figure.figsize"] = (3.2, 2.4)
 
 
 def parse_inputs():
@@ -78,6 +78,13 @@ checkRuns = (
     .count()
 )
 print(checkRuns)
+
+check_pol = (
+    output_og[["optimal_pol", "LeadTime", "E_probs", "overtimeC"]]
+    .groupby(["optimal_pol", "LeadTime", "E_probs"])
+    .count()
+)
+print(check_pol)
 
 # Separate into different tables dependent on policy
 output_opt = output_og.loc[output_og["optimal_pol"]]
