@@ -18,7 +18,7 @@ import math
 JOBSCRIPT = """#!/bin/bash
 
 #SBATCH --time=1:00:00
-#SBATCH --mem=5G
+#SBATCH --mem={mem}G
 #SBATCH --partition=regular
 #SBATCH --chdir=../..
 #SBATCH --output={slurm}
@@ -51,41 +51,53 @@ def experiment_one():
     num_phases = 3
     work = 5
     prob_options = [[0, 1, 0], [0.1, 0.8, 0.1], [0.2, 0.6, 0.2]]
+    lead_times = [0, 2, 14]
     pol_options = ["", "--threshold_pol_basic", "--threshold_pol_cost"]
-    for L in range(0, 29, 14):
+    for L in range(len(lead_times)):
         for cost_overtime in range(2, 6, 3):
             for p in range(3):
                 for alpha in range(2):
                     for pol in range(3):
-                        deadline = num_phases * work + L
-                        deadline += alpha * work
+                        deadline = num_phases * work
+                        deadline *= 2  # frequency
+                        deadline += alpha * work  + lead_times[L]
                         deadline = math.ceil(deadline)
+                        mem = 10
+                        if lead_times[L] == 0 and pol == 0:
+                            mem = 10
+                        if lead_times[L] == 2 and pol == 0:
+                            mem = 20
+                        if lead_times[L] == 14 and pol == 0:
+                            mem = 40
+                        if lead_times[L] == 28 and pol == 0:
+                            mem = 200
 
-                        job_name = f"{L}_{cost_overtime}_{p}_{alpha}_{pol}"
+                        job_name = f"{lead_times[L]}_{cost_overtime}_{p}_{alpha}_{pol}"
                         print(job_name)
                         with open(
                             location + "scripts/job" + job_name + ".sh", "w"
                         ) as script:
                             data = dict(
                                 deadline=deadline,
-                                L=L,
+                                L=lead_times[L],
                                 num_phases=3,
                                 work=5,
                                 shift_cost=1,
                                 cost_overtime=cost_overtime,
                                 freq=2,
                                 cost_phase=15,
-                                cost_early=-0.5,
+                                cost_early=0,
                                 epsilon_probs=f"{prob_options[p][0]} "
                                               f"{prob_options[p][1]} "
                                               f"{prob_options[p][2]}",
                                 policy_type=pol_options[pol],
                                 name=job_name,
                                 output_name=location
-                                + "Output_22-8_noA/"
+                                + "Output26-8betterT/"
                                 + job_name,
                                 slurm=location + "slurm/slurm-%j.out",
                                 main="main.py",
+                                mem=mem,
                             )
 
                             script.write(JOBSCRIPT.format(**data))
