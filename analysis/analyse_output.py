@@ -121,9 +121,10 @@ print(output.columns)
 
 output['basic_perc'] = output['solution_cost_basic'] - output['solution_cost_opt']
 output['basic_perc'] /= output['solution_cost_opt']
+output['basic_perc'] *= 100
 output['cost_perc'] = output['solution_cost_cost'] - output['solution_cost_opt']
 output['cost_perc'] /= output['solution_cost_opt']
-
+output['cost_perc'] *= 100
 # --------------------------------------------------------------------------------------------------------------------
 # Overall differences:
 costVopt = stats.ttest_rel(output['solution_cost_basic'], output['solution_cost_opt'], alternative='greater')
@@ -150,5 +151,7 @@ print(output.groupby(parameter_columns)[cost_columns].count())
 par_levels = output.groupby(parameter_columns)[cost_columns].mean()
 print(par_levels)
 for c in range(len(parameter_columns)):
-    print(output.groupby(parameter_columns[c])[cost_columns].mean())
-    print(output.groupby(parameter_columns[c])[perc_columns].mean())
+    print(output.groupby(parameter_columns[c])[cost_columns].mean().to_latex(float_format="{:.2f}".format))
+
+for c in range(len(parameter_columns)):
+    print(output.groupby(parameter_columns[c])[perc_columns].mean().to_latex(float_format="{:.2f}".format))
