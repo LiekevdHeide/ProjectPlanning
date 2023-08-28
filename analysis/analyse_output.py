@@ -71,7 +71,11 @@ output_og["optimal_pol"] = (output_og["threshold_pol_basic"] == False) & (
 
 output_og = output_og[output_og["LeadTime"] <= 14]
 
+output_og["alpha"] = output_og["Deadline"] - output_og["LeadTime"]
+output_og["alpha"] -= (output_og["NumPhases"] * 5 * 2)
+
 print(output_og)
+
 checkRuns = (
     output_og[["LeadTime", "E_probs", "overtimeC"]]
     .groupby(["LeadTime", "E_probs"])
@@ -106,12 +110,12 @@ assert len(output_opt.index) == len(output_cost.index), (f"Number of optimal exp
 
 output = pd.merge(output_opt, output_basic,  # .reset_index(),
                   on=["Deadline", "LeadTime", "NumPhases", "WorkPerPhase", "E_values", "E_probs", "shiftC",
-                      "shiftC_avg", "overtimeC", "phaseC", "earlyC"],
+                      "shiftC_avg", "overtimeC", "phaseC", "earlyC", "alpha"],
                   validate="one_to_one", suffixes=("_opt", "_basic"))
 
 output = pd.merge(output, output_cost,  # .reset_index(),
                   on=["Deadline", "LeadTime", "NumPhases", "WorkPerPhase", "E_values", "E_probs", "shiftC",
-                      "shiftC_avg", "overtimeC", "phaseC", "earlyC"],
+                      "shiftC_avg", "overtimeC", "phaseC", "earlyC", "alpha"],
                   validate="one_to_one", suffixes=("", "_cost"))
 cols = ["Filename", "solution_cost", "runtime"]
 output.rename(columns={c: c+'_cost' for c in output.columns if c in cols}, inplace=True)
@@ -146,7 +150,7 @@ print(f"The mean percentage differences are (basic, cost):\n{mean_perc}")
 
 # For different parameter levels:
 # ? deadline? freq?
-parameter_columns = ["Deadline", "LeadTime", "E_probs", "overtimeC", "earlyC"]
+parameter_columns = ["LeadTime", "E_probs", "alpha", "overtimeC", "earlyC"]
 print(output.groupby(parameter_columns)[cost_columns].count())
 par_levels = output.groupby(parameter_columns)[cost_columns].mean()
 print(par_levels)
@@ -154,4 +158,4 @@ for c in range(len(parameter_columns)):
     print(output.groupby(parameter_columns[c])[cost_columns].mean().to_latex(float_format="{:.2f}".format))
 
 for c in range(len(parameter_columns)):
-    print(output.groupby(parameter_columns[c])[perc_columns].mean().to_latex(float_format="{:.2f}".format))
+    print(output.groupby(parameter_columns[c])[perc_columns].mean().to_latex(float_format="{:.2f}%".format))

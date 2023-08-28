@@ -23,6 +23,7 @@ class Settings:
     shiftC: tuple[float]
     shiftC_avg: float
     overtimeC: float
+    overtimeFreq: int
     phaseC: tuple[float]
     earlyC: float
 
@@ -61,6 +62,7 @@ def create(args):
         "earlyC": early_cost,
         "WorkPerPhase": work_per_phase,
         "overtimeC": args.shiftC_overtime,
+        "overtimeFreq": args.overtime_freq,
     }
 
     # print(args, vars(args).keys)
