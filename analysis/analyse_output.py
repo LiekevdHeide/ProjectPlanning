@@ -95,51 +95,85 @@ output_opt = output_og.loc[output_og["optimal_pol"]]
 output_basic = output_og.loc[output_og["threshold_pol_basic"]]
 output_cost = output_og.loc[output_og["threshold_pol_cost"]]
 
-output_opt = output_opt.drop(columns=["threshold_pol_basic", "threshold_pol_cost", "optimal_pol", "threshold_val"])
-output_basic = output_basic.drop(columns=["threshold_pol_basic", "threshold_pol_cost", "optimal_pol"])
-output_cost = output_cost.drop(columns=["threshold_pol_basic", "threshold_pol_cost", "optimal_pol"])
+output_opt = output_opt.drop(columns=[
+    "threshold_pol_basic", "threshold_pol_cost", "optimal_pol", "threshold_val"
+])
+output_basic = output_basic.drop(columns=[
+    "threshold_pol_basic", "threshold_pol_cost", "optimal_pol"
+])
+output_cost = output_cost.drop(columns=[
+    "threshold_pol_basic", "threshold_pol_cost", "optimal_pol"
+])
 
-print("Lengths of tables:", "opt:", len(output_opt.index), "basic:", len(output_basic.index), "cost:",
-      len(output_cost.index))
+print(
+    "Lengths of tables:", "opt:", len(output_opt.index),
+    "basic:", len(output_basic.index),
+    "cost:", len(output_cost.index)
+    )
 
-assert len(output_opt.index) == len(output_basic.index), (f"Number of optimal experiments differs from basic threshold:"
-                                                          f"Optimal: {len(output_opt.index)} basic: {len(output_basic.index)}")
+assert len(output_opt.index) == len(output_basic.index), (
+    f"Number of optimal experiments differs from basic threshold:"
+    f"Optimal: {len(output_opt.index)} basic: {len(output_basic.index)}"
+)
 
-assert len(output_opt.index) == len(output_cost.index), (f"Number of optimal experiments differs from cost threshold:"
-                                                         f"Optimal: {len(output_opt.index)} basic: {len(output_cost.index)}")
+assert len(output_opt.index) == len(output_cost.index), (
+    f"Number of optimal experiments differs from cost threshold:"
+    f"Optimal: {len(output_opt.index)} basic: {len(output_cost.index)}"
+)
 
 output = pd.merge(output_opt, output_basic,  # .reset_index(),
-                  on=["Deadline", "LeadTime", "NumPhases", "WorkPerPhase", "E_values", "E_probs", "shiftC",
+                  on=["Deadline", "LeadTime", "NumPhases", "WorkPerPhase",
+                      "E_values", "E_probs", "shiftC",
                       "shiftC_avg", "overtimeC", "phaseC", "earlyC", "alpha"],
                   validate="one_to_one", suffixes=("_opt", "_basic"))
 
 output = pd.merge(output, output_cost,  # .reset_index(),
-                  on=["Deadline", "LeadTime", "NumPhases", "WorkPerPhase", "E_values", "E_probs", "shiftC",
+                  on=["Deadline", "LeadTime", "NumPhases", "WorkPerPhase",
+                      "E_values", "E_probs", "shiftC",
                       "shiftC_avg", "overtimeC", "phaseC", "earlyC", "alpha"],
                   validate="one_to_one", suffixes=("", "_cost"))
 cols = ["Filename", "solution_cost", "runtime"]
-output.rename(columns={c: c+'_cost' for c in output.columns if c in cols}, inplace=True)
-output.rename(columns={"threshold_val": "threshold_val_basic"}, inplace=True)
+output.rename(
+    columns={c: c+'_cost' for c in output.columns if c in cols}, inplace=True
+)
+output.rename(
+    columns={"threshold_val": "threshold_val_basic"}, inplace=True
+)
 
 print(output.columns)
 
-output['basic_perc'] = output['solution_cost_basic'] - output['solution_cost_opt']
+output['basic_perc'] = output['solution_cost_basic']
+output['basic_perc'] -= output['solution_cost_opt']
 output['basic_perc'] /= output['solution_cost_opt']
 output['basic_perc'] *= 100
-output['cost_perc'] = output['solution_cost_cost'] - output['solution_cost_opt']
+output['cost_perc'] = output['solution_cost_cost']
+output['cost_perc'] -= output['solution_cost_opt']
 output['cost_perc'] /= output['solution_cost_opt']
 output['cost_perc'] *= 100
-# --------------------------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Overall differences:
-costVopt = stats.ttest_rel(output['solution_cost_basic'], output['solution_cost_opt'], alternative='greater')
-basicVopt = stats.ttest_rel(output['solution_cost_cost'], output['solution_cost_opt'], alternative='greater')
-basicVcost = stats.ttest_rel(output['basic_perc'], output['cost_perc'], alternative='greater')
+costVopt = stats.ttest_rel(
+    output['solution_cost_basic'], output['solution_cost_opt'],
+    alternative='greater'
+)
+basicVopt = stats.ttest_rel(
+    output['solution_cost_cost'], output['solution_cost_opt'],
+    alternative='greater'
+)
+basicVcost = stats.ttest_rel(
+    output['basic_perc'], output['cost_perc'],
+    alternative='greater'
+)
 
-print(f"T tests for differences in costs and in percentage difference result in: "
-      f"Cost versus optimal: {costVopt}, basic versus optimal: {basicVopt} "
-      f"And the relative/percentage difference is: {basicVcost} ")
+print(
+    f"T tests for differences in costs and in percentage difference result in:"
+    f"Cost versus optimal: {costVopt}, basic versus optimal: {basicVopt} "
+    f"And the relative/percentage difference is: {basicVcost} "
+)
 
-cost_columns = ["solution_cost_opt", "solution_cost_basic", "solution_cost_cost"]
+cost_columns = [
+    "solution_cost_opt", "solution_cost_basic", "solution_cost_cost"
+]
 perc_columns = ["basic_perc", "cost_perc"]
 # Averages:
 mean_costs = output[cost_columns].mean()
@@ -155,7 +189,9 @@ print(output.groupby(parameter_columns)[cost_columns].count())
 par_levels = output.groupby(parameter_columns)[cost_columns].mean()
 print(par_levels)
 for c in range(len(parameter_columns)):
-    print(output.groupby(parameter_columns[c])[cost_columns].mean().to_latex(float_format="{:.2f}".format))
+    print(output.groupby(parameter_columns[c])[cost_columns].mean().to_latex(
+        float_format="{:.2f}".format))
 
 for c in range(len(parameter_columns)):
-    print(output.groupby(parameter_columns[c])[perc_columns].mean().to_latex(float_format="{:.2f}%".format))
+    print(output.groupby(parameter_columns[c])[perc_columns].mean().to_latex(
+        float_format="{:.2f}%".format))
