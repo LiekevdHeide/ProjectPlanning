@@ -8,6 +8,7 @@ import pandas as pd
 # import matplotlib.pyplot as plt
 from scipy import stats
 
+
 # matplotlib.rcParams["text.usetex"] = True
 # matplotlib.rcParams["font.family"] = "Helvetica"
 # matplotlib.rcParams["font.size"] = 10
@@ -69,8 +70,6 @@ output_og["optimal_pol"] = (output_og["threshold_pol_basic"] == False) & (
         output_og["threshold_pol_cost"] == False
 )
 
-output_og = output_og[output_og["LeadTime"] <= 14]
-
 output_og["alpha"] = output_og["Deadline"] - output_og["LeadTime"]
 output_og["alpha"] -= (output_og["NumPhases"] * 5 * 2)
 
@@ -109,7 +108,7 @@ print(
     "Lengths of tables:", "opt:", len(output_opt.index),
     "basic:", len(output_basic.index),
     "cost:", len(output_cost.index)
-    )
+)
 
 assert len(output_opt.index) == len(output_basic.index), (
     f"Number of optimal experiments differs from basic threshold:"
@@ -121,58 +120,76 @@ assert len(output_opt.index) == len(output_cost.index), (
     f"Optimal: {len(output_opt.index)} basic: {len(output_cost.index)}"
 )
 
+# Add basic threshold solution as a column
 output = pd.merge(output_opt, output_basic,  # .reset_index(),
                   on=["Deadline", "LeadTime", "NumPhases", "WorkPerPhase",
                       "E_values", "E_probs", "shiftC",
                       "shiftC_avg", "overtimeC", "phaseC", "earlyC", "alpha"],
-                  validate="one_to_one", suffixes=("_opt", "_basic"))
+                  validate="one_to_one", suffixes=("_o", "_b"))
 
+# Add cost threshold solution as a column
 output = pd.merge(output, output_cost,  # .reset_index(),
                   on=["Deadline", "LeadTime", "NumPhases", "WorkPerPhase",
                       "E_values", "E_probs", "shiftC",
                       "shiftC_avg", "overtimeC", "phaseC", "earlyC", "alpha"],
-                  validate="one_to_one", suffixes=("", "_cost"))
-cols = ["Filename", "solution_cost", "runtime"]
+                  validate="one_to_one", suffixes=("", "_c"))
+
+# Add the cost suffix to all columns from the cost threshold policy
+cols = ["Filename", "solution_cost", "runtime",
+        "split_shiftC", "split_overtimeC", "split_phaseC", "split_earlyC"]
 output.rename(
-    columns={c: c+'_cost' for c in output.columns if c in cols}, inplace=True
+    columns={c: c + '_c' for c in output.columns if c in cols}, inplace=True
 )
 output.rename(
-    columns={"threshold_val": "threshold_val_basic"}, inplace=True
+    columns={"threshold_val": "threshold_val_b"}, inplace=True
 )
 
 print(output.columns)
 
-output['basic_perc'] = output['solution_cost_basic']
-output['basic_perc'] -= output['solution_cost_opt']
-output['basic_perc'] /= output['solution_cost_opt']
+output['basic_perc'] = output['solution_cost_b']
+output['basic_perc'] -= output['solution_cost_o']
+output['basic_perc'] /= output['solution_cost_o']
 output['basic_perc'] *= 100
-output['cost_perc'] = output['solution_cost_cost']
-output['cost_perc'] -= output['solution_cost_opt']
-output['cost_perc'] /= output['solution_cost_opt']
+output['cost_perc'] = output['solution_cost_c']
+output['cost_perc'] -= output['solution_cost_o']
+output['cost_perc'] /= output['solution_cost_o']
 output['cost_perc'] *= 100
 # -----------------------------------------------------------------------------
 # Overall differences:
-costVopt = stats.ttest_rel(
-    output['solution_cost_basic'], output['solution_cost_opt'],
-    alternative='greater'
-)
-basicVopt = stats.ttest_rel(
-    output['solution_cost_cost'], output['solution_cost_opt'],
-    alternative='greater'
-)
+basic_cols = ['solution_cost_b', "split_shiftC_b",
+              "split_overtimeC_b", "split_earlyC_b",
+              "split_phaseC_b"]
+opt_cols = ['solution_cost_o', "split_shiftC_o",
+            "split_overtimeC_o", "split_earlyC_o",
+            "split_phaseC_o"]
+cost_cols = ['solution_cost_c', "split_shiftC_c",
+             "split_overtimeC_c", "split_earlyC_c",
+             "split_phaseC_c"]
+
+for i in range(len(basic_cols)):
+    costVopt = stats.ttest_rel(
+        output[basic_cols[i]], output[opt_cols[i]],
+        alternative='greater'
+    )
+    basicVopt = stats.ttest_rel(
+        output[cost_cols[i]], output[opt_cols[i]],
+        alternative='greater'
+    )
+    print(
+        f"T tests for differences in costs {basic_cols[i]} result in: "
+        f"Basic greater than optimal? pval {basicVopt.pvalue} "
+        f"Cost greater than optimal? pval {costVopt.pvalue}, "
+    )
+
 basicVcost = stats.ttest_rel(
-    output['basic_perc'], output['cost_perc'],
-    alternative='greater'
-)
+        output['basic_perc'], output['cost_perc'],
+        alternative='greater'
+    )
+f"And the t-test of all cost relative/percentage difference is: {basicVcost} "
 
-print(
-    f"T tests for differences in costs and in percentage difference result in:"
-    f"Cost versus optimal: {costVopt}, basic versus optimal: {basicVopt} "
-    f"And the relative/percentage difference is: {basicVcost} "
-)
-
+# -----------------------------------------------------------------------------
 cost_columns = [
-    "solution_cost_opt", "solution_cost_basic", "solution_cost_cost"
+    "solution_cost_o", "solution_cost_b", "solution_cost_c"
 ]
 perc_columns = ["basic_perc", "cost_perc"]
 # Averages:
@@ -195,3 +212,16 @@ for c in range(len(parameter_columns)):
 for c in range(len(parameter_columns)):
     print(output.groupby(parameter_columns[c])[perc_columns].mean().to_latex(
         float_format="{:.2f}%".format))
+
+output.columns = output.columns.str.removeprefix("split_")
+split_cost_columns = [
+    "shiftC_o", "shiftC_b", "shiftC_c",
+    "overtimeC_o", "overtimeC_b", "overtimeC_c",
+    "earlyC_o", "earlyC_b", "earlyC_c",
+    "phaseC_o", "phaseC_b", "phaseC_c",
+]
+for c in range(len(parameter_columns)):
+    print(output.groupby(
+        parameter_columns[c])[split_cost_columns].mean().to_latex(
+        float_format="{:.2f}".format)
+    )

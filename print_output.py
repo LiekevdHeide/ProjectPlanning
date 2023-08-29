@@ -21,8 +21,10 @@ def write_setting(file_name, setting, solution_cost, runtime):
             # write header
             csvfile.write("Filename;")
             csvfile.write(";".join(vars(setting).keys()))
-            csvfile.write(";shiftC;overtimeC;phaseC;earlyC")
-            csvfile.write(";" + "solution_cost;runtime" + "\n")
+            csvfile.write(
+                ";split_shiftC;split_overtimeC;split_phaseC;split_earlyC;"
+            )
+            csvfile.write("solution_cost;runtime" + "\n")
 
         # write values
         csvfile.write(f"{file_name};")
