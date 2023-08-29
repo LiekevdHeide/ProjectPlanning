@@ -21,6 +21,7 @@ def write_setting(file_name, setting, solution_cost, runtime):
             # write header
             csvfile.write("Filename;")
             csvfile.write(";".join(vars(setting).keys()))
+            csvfile.write(";shiftC;overtimeC;phaseC;earlyC")
             csvfile.write(";" + "solution_cost;runtime" + "\n")
 
         # write values
@@ -28,7 +29,9 @@ def write_setting(file_name, setting, solution_cost, runtime):
         csvfile.write(
             ";".join(f'{value}' for key, value in vars(setting).items())
         )
-        csvfile.write(f";{solution_cost};{runtime}\n")
+        for i in range(4):
+            csvfile.write(f";{solution_cost[i]}")
+        csvfile.write(f";{sum(solution_cost)};{runtime}\n")
 
 
 def combine_files(path, output_name):

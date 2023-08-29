@@ -29,7 +29,7 @@ def main():
     print(args.epsilon_probs)
 
     if args.threshold_pol_basic or args.threshold_pol_cost:
-        opt_cost_all = float('inf')
+        opt_cost_all = [float('inf'), 0, 0, 0]
         for th in range(1, 25):
             th /= 50  # th=0.14
             args.threshold_val = th
@@ -40,13 +40,14 @@ def main():
             setting, opt_cost = modelForm2.start_scheduling_model(args)
             runtime = timeit.default_timer() - stopwatch_start
             current_output = (
-                f"Overall costs {opt_cost:.3f} and runtime {runtime:.2f}"
+                f"Overall costs {sum(opt_cost):.3f} {opt_cost}"
+                f" and runtime {runtime:.2f}"
                 f", {setting.threshold_pol_basic=}, "
                 f"{setting.threshold_pol_cost=}, "
                 f"{setting.threshold_val=}"
             )
 
-            if opt_cost < opt_cost_all:
+            if sum(opt_cost) < sum(opt_cost_all):
                 opt_output = current_output
                 opt_cost_all = opt_cost
                 best_setting = setting
@@ -55,7 +56,8 @@ def main():
         best_setting, opt_cost_all = modelForm2.start_scheduling_model(args)
         runtime = timeit.default_timer() - stopwatch_start
         opt_output = (
-            f"Overall cost {opt_cost_all:.3f} and runtime {runtime:.2f}"
+            f"Overall cost {sum(opt_cost_all):.3f}, {opt_cost_all}"
+            f" and runtime {runtime:.2f}"
             f", {best_setting.threshold_pol_basic=}, "
             f"{best_setting.threshold_pol_cost=}, "
             f"{best_setting.threshold_val=}"
