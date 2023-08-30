@@ -118,12 +118,11 @@ def create(setting, planning):
 
     # Get the colors of the values, according to the
     # colormap used by imshow, used in plot[0,0]
-    colors = [im.cmap(im.norm(value)) for value in [0, 0.5, 1]]
+    colors = [im.cmap(im.norm(value)) for value in [0, 1]]
     # Create a patch (proxy artist) for every color.
     patches = [
         mpatches.Patch(color=colors[0], label="Don't schedule".format()),
-        mpatches.Patch(color=colors[1], label="Indifferent".format()),
-        mpatches.Patch(color=colors[2], label="Schedule".format()),
+        mpatches.Patch(color=colors[1], label="Schedule".format()),
     ]
     # Put those patched as legend-handles into the legend
     plt.figlegend(

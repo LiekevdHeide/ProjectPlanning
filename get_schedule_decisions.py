@@ -47,24 +47,28 @@ def optimal(setting):
                         setting, r + 1, schedule_no, phase, t + 1
                     )
                     plan_all[already, phase, r, t] = plan
+
+                    # Remainder only useful if include indifferent
+                    # OR when we want to check if plan is correct given the costs.
+                    cost = sum(cost)
                     cost_as_returned[already, phase, r, t] = cost
-                    cost_no = modelForm2.h_func(
+                    cost_no = sum(modelForm2.h_func(
                         setting, r + 1, schedule_no, phase, t + 1
-                    )
+                    ))
 
                     if t < setting.Deadline - lead_time:
                         cost_yes = setting.shiftC[t + lead_time]
-                        cost_yes += modelForm2.h_func(
+                        cost_yes += sum(modelForm2.h_func(
                             setting, r + 1, schedule_yes, phase, t + 1
-                        )
+                        ))
                     else:
                         # not allowed to schedule, so increase costs
                         cost_yes = cost_no + 1
 
                     # Change the plan to show indifference between
                     # scheduling and not scheduling.
-                    if cost_no == cost_yes:
-                        plan_all[already, phase, r, t] = 0.5
+                    # if cost_no == cost_yes:
+                    #     plan_all[already, phase, r, t] = 0.5
 
     return plan_all
 
