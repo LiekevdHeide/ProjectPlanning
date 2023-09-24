@@ -14,8 +14,8 @@ import sys
 
 # own functions
 import modelForm2
-import plot_planning
-import get_schedule_decisions
+# import plot_planning
+# import get_schedule_decisions
 import print_output
 
 
@@ -53,7 +53,11 @@ def main():
                 best_setting = setting
     else:
         stopwatch_start = timeit.default_timer()
-        best_setting, opt_cost_all = modelForm2.start_scheduling_model(args)
+        if args.LeadTime < 10:
+            best_setting, opt_cost_all = modelForm2.start_scheduling_model(args)
+        else:
+            best_setting, opt_cost_all = modelForm2.start_large_scheduling(args)
+
         runtime = timeit.default_timer() - stopwatch_start
         opt_output = (
             f"Overall cost {sum(opt_cost_all):.3f}, {opt_cost_all}"
@@ -71,16 +75,16 @@ def main():
     )
 
     # Print the current plan, or create a graph.
-    if args.show_plot:
-        if best_setting.NumPhases == 1:
-            # get scheduling decisions
-            plan_all = get_schedule_decisions.current(best_setting)
-            print(plan_all)
-        else:
-            # if setting.LeadTime <= 1:
-            # get scheduling decisions
-            plan_all = get_schedule_decisions.current(best_setting)
-            plot_planning.create(best_setting, plan_all)
+    # if args.show_plot:
+    #     if best_setting.NumPhases == 1:
+    #         # get scheduling decisions
+    #         plan_all = get_schedule_decisions.current(best_setting)
+    #         print(plan_all)
+    #     else:
+    #         # if setting.LeadTime <= 1:
+    #         # get scheduling decisions
+    #         plan_all = get_schedule_decisions.current(best_setting)
+    #         plot_planning.create(best_setting, plan_all)
 
     # Combine all output files in output_dir and combine in 1 file with name
     # print_output.combine_files(output_dir, "Combined/combi_all1")

@@ -40,21 +40,15 @@ def test_choice():
         for phase in range(setting.NumPhases):
             for r in range(setting.WorkPerPhase[phase]):
                 for t in range(setting.Deadline):
-                    cost[t], plan[t] = modelForm2.g_func(
-                        setting, r + 1, schedule_no, phase, t + 1
-                    )
+                    cost[t], plan[t] = modelForm2.g_func(r + 1, schedule_no, phase, t + 1)
                     plan_all[shift_hist, phase, r, t] = plan[t]
                     cost_as_returned[shift_hist, phase, r, t] = cost[t]
-                    cost_no[shift_hist, phase, r, t] = modelForm2.h_func(
-                        setting, r + 1, schedule_no, phase, t + 1
-                    )
+                    cost_no[shift_hist, phase, r, t] = modelForm2.h_func(r + 1, schedule_no, phase, t + 1)
                     if t < setting.Deadline - setting.LeadTime:
                         cost_yes[shift_hist, phase, r, t] = setting.shiftC[
                             t + setting.LeadTime + 1
                         ]
-                        cost_yes[shift_hist, phase, r, t] += modelForm2.h_func(
-                            setting, r + 1, schedule_yes, phase, t + 1
-                        )
+                        cost_yes[shift_hist, phase, r, t] += modelForm2.h_func(r + 1, schedule_yes, phase, t + 1)
                     else:
                         # not allowed to schedule, so increase costs
                         cost_yes[shift_hist, phase, r, t] = (

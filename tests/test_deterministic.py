@@ -26,20 +26,12 @@ def test_deterministic():
             for r in range(setting.WorkPerPhase[phase]):
                 for t in range(setting.Deadline - 1):
                     # calculates cost of choosing yes/no for current settings
-                    cost_y = modelForm2.h_func(
-                        setting, r + 1, (0, 1), phase, t + 1
-                    )
+                    cost_y = modelForm2.h_func(r + 1, (0, 1), phase, t + 1)
                     cost_y += setting.shiftC[t + setting.LeadTime]
-                    cost_n = modelForm2.h_func(
-                        setting, r + 1, (0, 0), phase, t + 1
-                    )
-                    min_cost_y, trash = modelForm2.g_func(
-                        setting, r + 1, (1, 0), phase, t + 2
-                    )
+                    cost_n = modelForm2.h_func(r + 1, (0, 0), phase, t + 1)
+                    min_cost_y, trash = modelForm2.g_func(r + 1, (1, 0), phase, t + 2)
                     min_cost_y += setting.shiftC[t + setting.LeadTime]
-                    min_cost_n, trash = modelForm2.g_func(
-                        setting, r + 1, (0, 0), phase, t + 2
-                    )
+                    min_cost_n, trash = modelForm2.g_func(r + 1, (0, 0), phase, t + 2)
                     # min_cost_y = cost_as_returned[1, phase, r, t + 1]
                     # min_cost_y += setting.ShiftC][t + setting.LeadTime]]
                     print(phase, r, t, cost_y, min_cost_y)
