@@ -40,7 +40,6 @@ def start_large_scheduling(args):
     # remaining_work = setting.WorkPerPhase[0]  # 4
     # scheduled_shifts = tuple(np.zeros(setting.LeadTime + 1, dtype=int))
     for t in reversed(range(2, g_setting.Deadline + 1)):
-        print(f"time {t}")
         for s in range(2**g_setting.LeadTime):
             # create schedule, can end in 0 since will be changed anyway
             str_sched = f"{s:0{setting.LeadTime}b}"[::-1] + "0"

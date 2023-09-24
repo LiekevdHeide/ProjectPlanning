@@ -53,7 +53,7 @@ def main():
                 best_setting = setting
     else:
         stopwatch_start = timeit.default_timer()
-        if args.LeadTime < 10:
+        if args.LeadTime <= 10:
             best_setting, opt_cost_all = modelForm2.start_scheduling_model(args)
         else:
             best_setting, opt_cost_all = modelForm2.start_large_scheduling(args)
