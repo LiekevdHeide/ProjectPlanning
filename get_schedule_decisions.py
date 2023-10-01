@@ -43,18 +43,18 @@ def optimal(setting):
             # Ignore r = 0, since it is never reached except in phase N
             for r in range(setting.WorkPerPhase[phase]):
                 for t in range(setting.Deadline):
-                    cost, plan = modelForm2.g_func(r + 1, schedule_no, phase, t + 1)
+                    cost, plan = modelForm2.g_func(setting, r + 1, schedule_no, phase, t + 1)
                     plan_all[already, phase, r, t] = plan
 
                     # Remainder only useful if include indifferent
                     # OR when we want to check if plan is correct given the costs.
                     cost = sum(cost)
                     cost_as_returned[already, phase, r, t] = cost
-                    cost_no = sum(modelForm2.h_func(r + 1, schedule_no, phase, t + 1))
+                    cost_no = sum(modelForm2.h_func(setting, r + 1, schedule_no, phase, t + 1))
 
                     if t < setting.Deadline - lead_time:
                         cost_yes = setting.shiftC[t + lead_time]
-                        cost_yes += sum(modelForm2.h_func(r + 1, schedule_yes, phase, t + 1))
+                        cost_yes += sum(modelForm2.h_func(setting, r + 1, schedule_yes, phase, t + 1))
                     else:
                         # not allowed to schedule, so increase costs
                         cost_yes = cost_no + 1
