@@ -50,7 +50,7 @@ def create(args):
     early_cost = args.earlyC
     # Set all cost of not finishing a phase and double the final cost.
     phase_costs = np.full(args.NumPhases, args.phaseC)
-    phase_costs[-1] *= 2
+    phase_costs[-1] *= 5
     phase_costs = tuple(phase_costs)
 
     inputs = {
