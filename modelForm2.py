@@ -48,7 +48,7 @@ def start_large_scheduling(args):
                            )
 
 
-@functools.lru_cache(maxsize=2000000)
+@functools.lru_cache(maxsize=10000000)
 def f_func(setting, remaining: int, schedule: tuple[int], phase: int, t: int
            ) -> float:
     assert t > 0, f"Error: Input time t={t} should be greater than 0."
@@ -71,7 +71,7 @@ def f_func(setting, remaining: int, schedule: tuple[int], phase: int, t: int
     return g_func(setting, remaining, schedule, phase, t)[0]
 
 
-@functools.lru_cache(maxsize=2000000)
+@functools.lru_cache(maxsize=10000000)
 def g_func(setting, remaining: int, schedule: tuple[int], phase: int, t: int) -> (float, int):
     lead_time = setting.LeadTime
     if t > setting.Deadline - lead_time:
@@ -130,7 +130,7 @@ def l_2(setting, time: int) -> float:
     return np.array([0.0, 0.0, 0.0, (setting.Deadline - (time - 1)) * setting.earlyC])
 
 
-@functools.lru_cache(maxsize=2000000)
+@functools.lru_cache(maxsize=10000000)
 def h_func(setting, remaining: int, schedule: tuple[int], phase: int, t: int) -> float:
     # roll the schedule to t + 1
     schedule = np.roll(schedule, -1)
@@ -142,7 +142,7 @@ def h_func(setting, remaining: int, schedule: tuple[int], phase: int, t: int) ->
     return k_func(setting, remaining, schedule, phase, t)
 
 
-@functools.lru_cache(maxsize=2000000)
+@functools.lru_cache(maxsize=10000000)
 def k_func(setting, remaining: int, schedule: tuple[int], n: int, t: int) -> float:
     # work on current phase, if no work remaining continue on hext phase
     # Calculate the expected remaining cost using probs & values of epsilon

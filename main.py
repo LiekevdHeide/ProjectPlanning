@@ -30,8 +30,8 @@ def main():
 
     if args.threshold_pol_basic or args.threshold_pol_cost:
         opt_cost_all = [float('inf'), 0, 0, 0]
-        for th in range(1, 25):
-            th /= 50  # th=0.14
+        for th in range(1, 100):
+            th /= 100  # th=0.14
             args.threshold_val = th
 
             stopwatch_start = timeit.default_timer()
