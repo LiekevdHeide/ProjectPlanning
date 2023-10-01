@@ -71,7 +71,7 @@ output_og["optimal_pol"] = (output_og["threshold_pol_basic"] == False) & (
 )
 
 output_og["alpha"] = output_og["Deadline"] - output_og["LeadTime"]
-output_og["alpha"] -= (output_og["NumPhases"] * 5 * 2)
+# output_og["alpha"] -= (output_og["NumPhases"] * 5 * 2)
 
 print(output_og)
 
@@ -199,9 +199,17 @@ print(f"The mean cost are (opt, basic, cost):\n{mean_costs}")
 mean_perc = output[["basic_perc", "cost_perc"]].mean()
 print(f"The mean percentage differences are (basic, cost):\n{mean_perc}")
 
+# Averages only for overtimeCost = 2:
+print("Cost and percentage difference for overtimeCost 2:")
+print(output.groupby("overtimeC")[cost_columns].mean().to_latex(
+        float_format="{:.2f}".format))
+print(output.groupby("overtimeC")[perc_columns].mean().to_latex(
+        float_format="{:.2f}".format))
+
 # For different parameter levels:
 # ? deadline? freq?
 parameter_columns = ["LeadTime", "E_probs", "alpha", "overtimeC", "earlyC"]
+threshold_columns = ["threshold_val_b", "threshold_val_c"]
 print(output.groupby(parameter_columns)[cost_columns].count())
 par_levels = output.groupby(parameter_columns)[cost_columns].mean()
 print(par_levels)
@@ -212,6 +220,10 @@ for c in range(len(parameter_columns)):
 for c in range(len(parameter_columns)):
     print(output.groupby(parameter_columns[c])[perc_columns].mean().to_latex(
         float_format="{:.2f}%".format))
+
+for c in range(len(parameter_columns)):
+    print(output.groupby(parameter_columns[c])[threshold_columns].mean().to_latex(
+        float_format="{:.2f}".format))
 
 output.columns = output.columns.str.removeprefix("split_")
 split_cost_columns = [

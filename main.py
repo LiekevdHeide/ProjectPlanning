@@ -30,8 +30,8 @@ def main():
 
     if args.threshold_pol_basic or args.threshold_pol_cost:
         opt_cost_all = [float('inf'), 0, 0, 0]
-        for th in range(1, 25):
-            th /= 50  # th=0.14
+        for th in range(1, 100):
+            th /= 100  # th=0.14
             args.threshold_val = th
 
             stopwatch_start = timeit.default_timer()
@@ -53,7 +53,7 @@ def main():
                 best_setting = setting
     else:
         stopwatch_start = timeit.default_timer()
-        if args.LeadTime < 10:
+        if args.LeadTime <= 10:
             best_setting, opt_cost_all = modelForm2.start_scheduling_model(args)
         else:
             best_setting, opt_cost_all = modelForm2.start_large_scheduling(args)

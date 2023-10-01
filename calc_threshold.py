@@ -29,7 +29,7 @@ def measure_basic(
     val = remaining + sum(setting.WorkPerPhase[phase:setting.NumPhases - 1])
     val -= sum(schedule[:setting.LeadTime])
     val /= (setting.Deadline - (t + setting.LeadTime - 1))
-    if val > setting.threshold_val:
+    if val >= setting.threshold_val:
         return True
 
     return False
@@ -42,7 +42,7 @@ def measure_cost(
     val -= sum(schedule[:setting.LeadTime])
     val /= (setting.Deadline - (t + setting.LeadTime - 1))
     val /= (setting.shiftC[t + setting.LeadTime] / setting.shiftC_avg)
-    if val > setting.threshold_val:
+    if val >= setting.threshold_val:
         return True
 
     return False
