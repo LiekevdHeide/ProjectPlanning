@@ -29,9 +29,9 @@ def create(setting, planning):
     # Create title for combined plot.
     title = f"Schedule for each phase leadtime {setting.LeadTime}"
     if setting.threshold_pol_basic:
-        title += ", benchmark_b"
+        title += ", basic threshold policy"
     elif setting.threshold_pol_cost:
-        title += ", benchmark_c"
+        title += ", shift-based threshold policy"
     fig.suptitle(title, fontsize=16)
 
     # if lead time = 0: only one column -> index is 1 value
@@ -134,8 +134,15 @@ def create(setting, planning):
     )
     plt.tight_layout()
     # fig.subplots_adjust(top=0.88) # in combination with tight_layout
-    # plt.savefig(
-    #     f"Plot_schedule_{setting.WorkPerPhase[0]}{setting.LeadTime}.pdf"
-    # )
+    pdf_title = f"Plot_schedule_"
+    if setting.threshold_pol_basic:
+        pdf_title += "ThresholdBasic_"
+    elif setting.threshold_pol_cost:
+        title += "ThresholdShift_"
+    else:
+        title += "OPT_"
+    plt.savefig(
+         pdf_title + f"{setting.WorkPerPhase[0]}{setting.LeadTime}.pdf"
+    )
     plt.show()
     plt.close()
