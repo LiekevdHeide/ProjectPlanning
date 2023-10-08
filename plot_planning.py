@@ -32,7 +32,7 @@ def create(setting, planning):
         title += ", basic threshold policy"
     elif setting.threshold_pol_cost:
         title += ", shift-based threshold policy"
-    fig.suptitle(title, fontsize=16)
+    # fig.suptitle(title, fontsize=16)
 
     # if lead time = 0: only one column -> index is 1 value
     if setting.LeadTime == 0:
@@ -41,8 +41,9 @@ def create(setting, planning):
         index = (0, 0)
     # create one plot with name, so we can use its colors
     im = axarr[index].imshow(
-        planning[0, 0], cmap=plt.cm.Purples, interpolation="none"
+        planning[0, 0], cmap=plt.cm.Greys, interpolation="none"
     )
+
     for i in range(setting.NumPhases):
         for j in range(max(1, 2**setting.LeadTime)):
             # if lead time = 0: only one column -> index is 1 value
@@ -52,8 +53,9 @@ def create(setting, planning):
                 index = (i, j)
             if sum(index) != 0:
                 axarr[index].imshow(
-                    planning[j, i], cmap=plt.cm.Purples, interpolation="none"
+                    planning[j, i], cmap=plt.cm.Greys, interpolation="none"
                 )
+            axarr[index].axvline(x=1.5, color='red')
 
     for i in range(setting.NumPhases):
         for j in range(max(1, 2**setting.LeadTime)):
@@ -64,7 +66,7 @@ def create(setting, planning):
                 index = (i, j)
             if j == 0:
                 axarr[index].set_ylabel("Remaining work")
-            axarr[index].set_xlabel("Time")
+            axarr[index].set_xlabel("Shift")
             if setting.LeadTime == 0:
                 axarr[index].set_title(f"Phase {i + 1}")
             if setting.LeadTime > 1:
@@ -79,12 +81,15 @@ def create(setting, planning):
             axarr[index].xaxis.set_major_locator(
                 mticker.MaxNLocator(min(10, setting.Deadline), integer=True)
             )
+
             # x label values
             ticks_loc = axarr[index].get_xticks().tolist()
             axarr[index].xaxis.set_major_locator(
                 mticker.FixedLocator(ticks_loc)
             )
-            axarr[index].set_xticklabels([int(x + 1) for x in ticks_loc])
+            # axarr[index].set_xticklabels([int(x + 1) for x in ticks_loc])
+            x_labels = [0, 0, 0, 0, 0] + list(range(1, setting.Deadline + 2))
+            axarr[index].set_xticklabels(x_labels[::3])
 
             # y labels
             # make sure it's not too cluttered
@@ -121,28 +126,31 @@ def create(setting, planning):
     colors = [im.cmap(im.norm(value)) for value in [0, 1]]
     # Create a patch (proxy artist) for every color.
     patches = [
-        mpatches.Patch(color=colors[0], label="Don't schedule".format()),
-        mpatches.Patch(color=colors[1], label="Schedule".format()),
+        mpatches.Rectangle((0, 0), 1, 1, facecolor=colors[0], edgecolor='black', label="Don't schedule".format()),
+        mpatches.Rectangle((0, 0), 1, 1, facecolor=colors[1], edgecolor='black', label="Schedule".format()),
     ]
+
     # Put those patched as legend-handles into the legend
     plt.figlegend(
         handles=patches,
         loc="upper right",
-        ncol=3,
-        bbox_to_anchor=(0.99, 0.965),
+        ncol=2,
+        bbox_to_anchor=(0.99, 0.985),
         frameon=False,
     )
+
     plt.tight_layout()
     # fig.subplots_adjust(top=0.88) # in combination with tight_layout
-    pdf_title = f"Plot_schedule_"
+    pdf_title = "Plot_schedule_"
     if setting.threshold_pol_basic:
         pdf_title += "ThresholdBasic_"
-    elif setting.threshold_pol_cost:
-        title += "ThresholdShift_"
-    else:
-        title += "OPT_"
+    if setting.threshold_pol_cost:
+        pdf_title += "ThresholdShift_"
+    if not setting.threshold_pol_basic and not setting.threshold_pol_cost:
+        pdf_title += "OPT_"
     plt.savefig(
          pdf_title + f"{setting.WorkPerPhase[0]}{setting.LeadTime}.pdf"
     )
+    print(pdf_title)
     plt.show()
     plt.close()
