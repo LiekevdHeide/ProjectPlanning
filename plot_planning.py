@@ -13,6 +13,7 @@ import matplotlib.ticker as mticker
 
 matplotlib.rcParams["text.usetex"] = True
 matplotlib.rcParams["font.family"] = "Helvetica"
+matplotlib.rcParams["font.size"] = 11
 
 
 def create(setting, planning):
@@ -24,8 +25,9 @@ def create(setting, planning):
         setting.NumPhases, max(1, 2**setting.LeadTime)
     )  # , sharex=True
     # size of figure based on number of columns
-    fig.set_size_inches(2.5 * max(1, 2**setting.LeadTime),
-                        0.5 + 1.8 * setting.NumPhases)
+    # fig.set_size_inches(2.6 * max(1, 2**setting.LeadTime),
+    #                     0.5 + 1.5 * setting.NumPhases)
+    fig.set_size_inches(8, 2.7)
     # Create title for combined plot.
     title = f"Schedule for each phase leadtime {setting.LeadTime}"
     if setting.threshold_pol_basic:
@@ -95,7 +97,7 @@ def create(setting, planning):
             # make sure it's not too cluttered
             axarr[index].yaxis.set_major_locator(
                 mticker.MaxNLocator(
-                    min(5, setting.WorkPerPhase[i]), integer=True
+                    min(3, setting.WorkPerPhase[i]), integer=True
                 )
             )
             # y label values
@@ -135,7 +137,7 @@ def create(setting, planning):
         handles=patches,
         loc="upper right",
         ncol=2,
-        bbox_to_anchor=(0.99, 0.985),
+        bbox_to_anchor=(0.99, 0.9999),  # 85),
         frameon=False,
     )
 
