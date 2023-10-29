@@ -83,17 +83,21 @@ def create(setting, planning):
             # x labels
             # Major ticks for the axis labels
             axarr[index].xaxis.set_major_locator(
-                mticker.MaxNLocator(min(10, setting.Deadline), integer=True)
+                mticker.MaxNLocator((setting.Deadline + setting.LeadTime) / 2, integer=True)
             )
 
             # x label values
             ticks_loc = axarr[index].get_xticks().tolist()
-            axarr[index].xaxis.set_major_locator(
-                mticker.FixedLocator(ticks_loc)
-            )
-            # axarr[index].set_xticklabels([int(x + 1) for x in ticks_loc])
+            # axarr[index].xaxis.set_major_locator(
+            #     mticker.FixedLocator(ticks_loc)
+            # )
+            ticks_loc = [int(x - 1) for x in ticks_loc]
+            ticks_loc[0] = 0
+            ticks_loc[1] = 0
+            print(ticks_loc)
+            axarr[index].set_xticklabels(ticks_loc)  # [int(x + 1) for x in ticks_loc])
             # x_labels = [0, 0, 0, 0, 0] + list(range(1, setting.Deadline + 2))
-            axarr[index].set_xticklabels([0, 0, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19])
+            # axarr[index].set_xticklabels([0, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19])
 
             # y labels
             # make sure it's not too cluttered
@@ -145,7 +149,7 @@ def create(setting, planning):
 
     plt.tight_layout()
     # fig.subplots_adjust(top=0.88) # in combination with tight_layout
-    pdf_title = "Plot_schedule_"
+    pdf_title = "vertical_Plot_schedule_"
     if setting.threshold_pol_basic:
         pdf_title += "ThresholdBasic_"
     if setting.threshold_pol_cost:
