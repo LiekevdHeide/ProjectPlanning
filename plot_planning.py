@@ -94,7 +94,6 @@ def create(setting, planning):
             ticks_loc = [int(x - 1) for x in ticks_loc]
             ticks_loc[0] = 0
             ticks_loc[1] = 0
-            print(ticks_loc)
             axarr[index].set_xticklabels(ticks_loc)  # [int(x + 1) for x in ticks_loc])
             # x_labels = [0, 0, 0, 0, 0] + list(range(1, setting.Deadline + 2))
             # axarr[index].set_xticklabels([0, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19])
@@ -157,7 +156,7 @@ def create(setting, planning):
     if not setting.threshold_pol_basic and not setting.threshold_pol_cost:
         pdf_title += "OPT_"
     plt.savefig(
-         pdf_title + f"{setting.WorkPerPhase[0]}{setting.LeadTime}.pdf"
+         pdf_title + f"{setting.WorkPerPhase[0]}_{setting.LeadTime}_{setting.E_probs}.pdf"
     )
     print(pdf_title)
     plt.show()
