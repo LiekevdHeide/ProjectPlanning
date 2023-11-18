@@ -13,7 +13,7 @@ import matplotlib.ticker as mticker
 
 matplotlib.rcParams["text.usetex"] = True
 matplotlib.rcParams["font.family"] = "Helvetica"
-matplotlib.rcParams["font.size"] = 11
+matplotlib.rcParams["font.size"] = 12
 
 
 def create(setting, planning):
@@ -22,12 +22,14 @@ def create(setting, planning):
         return
     # Create figure with subplots: numPhases x leadTime
     fig, axarr = plt.subplots(
-        setting.NumPhases, max(1, 2**setting.LeadTime)
-    )  # , sharex=True
+        max(1, 2**setting.LeadTime), setting.NumPhases
+    )
+    # , sharex=True
     # size of figure based on number of columns
     # fig.set_size_inches(2.6 * max(1, 2**setting.LeadTime),
     #                     0.5 + 1.5 * setting.NumPhases)
-    fig.set_size_inches(8, 2.7)
+    fig.set_size_inches(6, 8)
+
     # Create title for combined plot.
     title = f"Schedule for each phase leadtime {setting.LeadTime}"
     if setting.threshold_pol_basic:
@@ -46,8 +48,8 @@ def create(setting, planning):
         planning[0, 0], cmap=plt.cm.Greys, interpolation="none"
     )
 
-    for i in range(setting.NumPhases):
-        for j in range(max(1, 2**setting.LeadTime)):
+    for i in range(max(1, 2**setting.LeadTime)):
+        for j in range(setting.NumPhases):
             # if lead time = 0: only one column -> index is 1 value
             if setting.LeadTime == 0:
                 index = (i,)
@@ -55,12 +57,12 @@ def create(setting, planning):
                 index = (i, j)
             if sum(index) != 0:
                 axarr[index].imshow(
-                    planning[j, i], cmap=plt.cm.Greys, interpolation="none"
+                    planning[i, j], cmap=plt.cm.Greys, interpolation="none"
                 )
             axarr[index].axvline(x=1.5, color='red')
 
-    for i in range(setting.NumPhases):
-        for j in range(max(1, 2**setting.LeadTime)):
+    for i in range(max(1, 2**setting.LeadTime)):
+        for j in range(setting.NumPhases):
             # Index = location of subplot [x, y] coordinate
             if setting.LeadTime == 0:
                 index = i
@@ -70,34 +72,37 @@ def create(setting, planning):
                 axarr[index].set_ylabel("Remaining work")
             axarr[index].set_xlabel("Shift")
             if setting.LeadTime == 0:
-                axarr[index].set_title(f"Phase {i + 1}")
+                axarr[index].set_title(f"Phase {j + 1}")
             if setting.LeadTime > 1:
-                plan = f"{j:0{setting.LeadTime}b}"[::-1]
+                plan = f"{i:0{setting.LeadTime}b}"[::-1]
                 axarr[index].set_title(
-                    f"Phase {i + 1}, plan {plan}?"
+                    f"Phase {j + 1}, plan {plan}?"
                 )
             axarr[index].invert_yaxis()
 
             # x labels
             # Major ticks for the axis labels
             axarr[index].xaxis.set_major_locator(
-                mticker.MaxNLocator(min(10, setting.Deadline), integer=True)
+                mticker.MaxNLocator((setting.Deadline + setting.LeadTime) / 2, integer=True)
             )
 
             # x label values
             ticks_loc = axarr[index].get_xticks().tolist()
-            axarr[index].xaxis.set_major_locator(
-                mticker.FixedLocator(ticks_loc)
-            )
-            # axarr[index].set_xticklabels([int(x + 1) for x in ticks_loc])
-            x_labels = [0, 0, 0, 0, 0] + list(range(1, setting.Deadline + 2))
-            axarr[index].set_xticklabels(x_labels[::3])
+            # axarr[index].xaxis.set_major_locator(
+            #     mticker.FixedLocator(ticks_loc)
+            # )
+            ticks_loc = [int(x - 1) for x in ticks_loc]
+            ticks_loc[0] = 0
+            ticks_loc[1] = 0
+            axarr[index].set_xticklabels(ticks_loc)  # [int(x + 1) for x in ticks_loc])
+            # x_labels = [0, 0, 0, 0, 0] + list(range(1, setting.Deadline + 2))
+            # axarr[index].set_xticklabels([0, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19])
 
             # y labels
             # make sure it's not too cluttered
             axarr[index].yaxis.set_major_locator(
                 mticker.MaxNLocator(
-                    min(3, setting.WorkPerPhase[i]), integer=True
+                    min(3, setting.WorkPerPhase[j]), integer=True
                 )
             )
             # y label values
@@ -109,7 +114,7 @@ def create(setting, planning):
 
             # Minor ticks to add the gridlines
             axarr[index].set_yticks(
-                np.arange(0.5, setting.WorkPerPhase[i] - 1), minor=True
+                np.arange(0.5, setting.WorkPerPhase[j] - 1), minor=True
             )
             axarr[index].set_xticks(
                 np.arange(0.5, setting.Deadline - 1), minor=True
@@ -143,7 +148,7 @@ def create(setting, planning):
 
     plt.tight_layout()
     # fig.subplots_adjust(top=0.88) # in combination with tight_layout
-    pdf_title = "Plot_schedule_"
+    pdf_title = "vertical_Plot_schedule_"
     if setting.threshold_pol_basic:
         pdf_title += "ThresholdBasic_"
     if setting.threshold_pol_cost:
@@ -151,7 +156,7 @@ def create(setting, planning):
     if not setting.threshold_pol_basic and not setting.threshold_pol_cost:
         pdf_title += "OPT_"
     plt.savefig(
-         pdf_title + f"{setting.WorkPerPhase[0]}{setting.LeadTime}.pdf"
+         pdf_title + f"{setting.WorkPerPhase[0]}_{setting.LeadTime}_{setting.E_probs}.pdf"
     )
     print(pdf_title)
     plt.show()

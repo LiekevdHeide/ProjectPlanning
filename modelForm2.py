@@ -88,9 +88,9 @@ def g_func(setting, remaining: int, schedule: tuple[int], phase: int, t: int) ->
     if not (setting.threshold_pol_basic or setting.threshold_pol_cost):
         cost_no = h_func(setting, remaining, schedule_no, phase, t)
         if setting.shiftC[t + lead_time] > setting.shiftC_avg:
-            cost_yes = np.array([0, setting.shiftC[t + lead_time], 0, 0])
+            cost_yes = np.array([0.0, setting.shiftC[t + lead_time], 0.0, 0.0])
         else:
-            cost_yes = np.array([setting.shiftC[t + lead_time], 0, 0, 0])
+            cost_yes = np.array([setting.shiftC[t + lead_time], 0.0, 0.0, 0.0])
         cost_yes += h_func(setting, remaining, schedule_yes, phase, t)
         if sum(cost_yes) < sum(cost_no):
             return cost_yes, 1
