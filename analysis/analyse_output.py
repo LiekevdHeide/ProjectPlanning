@@ -192,6 +192,7 @@ cost_columns = [
     "solution_cost_o", "solution_cost_b", "solution_cost_c"
 ]
 perc_columns = ["basic_perc", "cost_perc"]
+cost_perc_columns = ["solution_cost_o", "basic_perc", "cost_perc"]
 # Averages:
 mean_costs = output[cost_columns].mean()
 print(f"The mean cost are (opt, basic, cost):\n{mean_costs}")
@@ -216,6 +217,11 @@ print(par_levels)
 for c in range(len(parameter_columns)):
     print(output.groupby(parameter_columns[c])[cost_columns].mean().to_latex(
         float_format="{:.2f}".format))
+
+print("Output cost, then percentage increases:")
+for c in range(len(parameter_columns)):
+    print(output.groupby(parameter_columns[c])[cost_perc_columns].mean().to_latex(
+        float_format="{:.2f}%".format))
 
 for c in range(len(parameter_columns)):
     print(output.groupby(parameter_columns[c])[perc_columns].mean().to_latex(
