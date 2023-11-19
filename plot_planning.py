@@ -12,8 +12,8 @@ import matplotlib.patches as mpatches
 import matplotlib.ticker as mticker
 
 matplotlib.rcParams["text.usetex"] = True
-matplotlib.rcParams["font.family"] = "Helvetica"
-matplotlib.rcParams["font.size"] = 12
+# matplotlib.rcParams["font.family"] = "Helvetica"
+# matplotlib.rcParams["font.size"] = 12
 
 
 def create(setting, planning):
@@ -22,13 +22,13 @@ def create(setting, planning):
         return
     # Create figure with subplots: numPhases x leadTime
     fig, axarr = plt.subplots(
-        max(1, 2**setting.LeadTime), setting.NumPhases
+        max(1, 2**setting.LeadTime), setting.NumPhases, sharex=True, sharey=True
     )
     # , sharex=True
     # size of figure based on number of columns
     # fig.set_size_inches(2.6 * max(1, 2**setting.LeadTime),
     #                     0.5 + 1.5 * setting.NumPhases)
-    fig.set_size_inches(6, 8)
+    # fig.set_size_inches(6, 5)
 
     # Create title for combined plot.
     title = f"Schedule for each phase leadtime {setting.LeadTime}"
@@ -69,16 +69,16 @@ def create(setting, planning):
             else:
                 index = (i, j)
             if j == 0:
-                axarr[index].set_ylabel("Remaining work")
+                axarr[index].set_ylabel("Work")  # "Remaining work")
             axarr[index].set_xlabel("Shift")
-            if setting.LeadTime == 0:
-                axarr[index].set_title(f"Phase {j + 1}")
-            if setting.LeadTime > 1:
-                plan = f"{i:0{setting.LeadTime}b}"[::-1]
-                axarr[index].set_title(
-                    f"Phase {j + 1}, plan {plan}?"
-                )
-            axarr[index].invert_yaxis()
+
+            # if setting.LeadTime == 0:
+            #     axarr[index].set_title(f"Phase {j + 1}")
+            # if setting.LeadTime > 1:
+            #     plan = f"{i:0{setting.LeadTime}b}"[::-1]
+            #     axarr[index].set_title(
+            #         f"Phase {j + 1}, plan {plan}?"
+            #     )
 
             # x labels
             # Major ticks for the axis labels
@@ -127,24 +127,37 @@ def create(setting, planning):
             axarr[index].tick_params(
                 which="minor", bottom=False, top=False, left=False
             )
+    axarr[index].invert_yaxis()
+
+    # Add caption only to top row:
+    for j in range(setting.NumPhases):
+        axarr[(0, j)].set_title(f"Phase {j + 1}")
+    for i in range(max(1, 2**setting.LeadTime)):
+        plan = f"{i:0{setting.LeadTime}b}"[::-1]
+        axarr[(i, 0)].annotate(f"Plan {plan}?", (-0.5, 0.5), xycoords='axes fraction',
+                               rotation=0, va='center', fontsize=12)
 
     # Get the colors of the values, according to the
     # colormap used by imshow, used in plot[0,0]
     colors = [im.cmap(im.norm(value)) for value in [0, 1]]
     # Create a patch (proxy artist) for every color.
     patches = [
-        mpatches.Rectangle((0, 0), 1, 1, facecolor=colors[0], edgecolor='black', label="Don't schedule".format()),
         mpatches.Rectangle((0, 0), 1, 1, facecolor=colors[1], edgecolor='black', label="Schedule".format()),
+        mpatches.Rectangle((0, 0), 1, 1, facecolor=colors[0], edgecolor='black', label="Don't schedule".format()),
     ]
 
     # Put those patched as legend-handles into the legend
     plt.figlegend(
         handles=patches,
-        loc="upper right",
-        ncol=2,
-        bbox_to_anchor=(0.99, 0.9999),  # 85),
+        loc="upper left",
+        # ncol=2,
+        # bbox_to_anchor=(0.99, 0.9999),  # 85),
         frameon=False,
     )
+
+    # Hide x labels and tick labels for all but left or top most plots
+    for ax in fig.get_axes():
+        ax.label_outer()
 
     plt.tight_layout()
     # fig.subplots_adjust(top=0.88) # in combination with tight_layout
