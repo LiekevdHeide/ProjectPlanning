@@ -4,8 +4,8 @@ Input: -f file name (including directory)
 """
 import argparse
 import pandas as pd
-# import matplotlib
-# import matplotlib.pyplot as plt
+import matplotlib
+import matplotlib.pyplot as plt
 from scipy import stats
 
 
@@ -243,3 +243,27 @@ for c in range(len(parameter_columns)):
         parameter_columns[c])[split_cost_columns].mean().to_latex(
         float_format="{:.2f}".format)
     )
+
+# Split the uncertainties column
+output = pd.concat([output, output["E_probs"].str.split(', ', expand=True)], axis=1)
+output.rename({1: "Probability 1"}, axis=1, inplace=True)
+output["Probability 1"] = pd.to_numeric(output["Probability 1"])
+
+# Make plots of impact of uncertainty:
+leadTimes = output["LeadTime"].unique()
+for idx_l in range(0, leadTimes.size, 1):
+    plotUncertainty = output[(output["LeadTime"] == leadTimes[idx_l]) & (output["alpha"] == 60) & (output["overtimeC"] == 1.5)]
+    plotUncertainty = plotUncertainty.sort_values(by=["Probability 1"], ascending=False)
+
+    plotUncertainty.plot(x="Probability 1", y=cost_columns, kind="line")
+    # set locations and names of the labels
+    plt.xticks([1.0, 0.9, 0.8, 0.7, 0.6])
+    plt.title(f"Lead time {leadTimes[idx_l]}")
+    plt.show()
+
+plotOvertime = output[(output["LeadTime"] == 0) & (output["alpha"] == 60) & (output["E_probs"] == "(0.1, 0.8, 0.1)")]
+plotOvertime = plotOvertime.sort_values(by=["overtimeC"])
+print(plotOvertime[cost_columns])
+
+plotOvertime.plot(x="overtimeC", y=cost_columns, kind="line")
+plt.show()
