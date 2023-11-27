@@ -244,26 +244,38 @@ for c in range(len(parameter_columns)):
         float_format="{:.2f}".format)
     )
 
+# -----------------------------------------------------------------------------------------------------------
 # Split the uncertainties column
 output = pd.concat([output, output["E_probs"].str.split(', ', expand=True)], axis=1)
-output.rename({1: "Probability 1"}, axis=1, inplace=True)
-output["Probability 1"] = pd.to_numeric(output["Probability 1"])
+output.rename({1: "Uncertainty"}, axis=1, inplace=True)
+output["Uncertainty"] = 1 - pd.to_numeric(output["Uncertainty"])
+print(output["Uncertainty"])
 
 # Make plots of impact of uncertainty:
 leadTimes = output["LeadTime"].unique()
 for idx_l in range(0, leadTimes.size, 1):
     plotUncertainty = output[(output["LeadTime"] == leadTimes[idx_l]) & (output["alpha"] == 60) & (output["overtimeC"] == 1.5)]
-    plotUncertainty = plotUncertainty.sort_values(by=["Probability 1"], ascending=False)
+    plotUncertainty = plotUncertainty.sort_values(by=["Uncertainty"], ascending=False)
 
-    plotUncertainty.plot(x="Probability 1", y=cost_columns, kind="line")
+    fig, ax = plt.subplots()
+    for idx_c in range(0, 3, 1):
+        ax.scatter(x=plotUncertainty["Uncertainty"], y=plotUncertainty[cost_columns[idx_c]])
+
     # set locations and names of the labels
-    plt.xticks([1.0, 0.9, 0.8, 0.7, 0.6])
+    plt.xticks([0.0, 0.1, 0.2, 0.3, 0.4])
+    plt.title(f"Impact of uncertainty for lead time {leadTimes[idx_l]}")
+    # plt.show()
+
+    fig, ax = plt.subplots()
+    plotUncertainty.plot(ax=ax, x="Uncertainty", y=cost_columns, kind="line")
+    plt.xticks([0.0, 0.1, 0.2, 0.3, 0.4])
     plt.title(f"Lead time {leadTimes[idx_l]}")
     plt.show()
 
-plotOvertime = output[(output["LeadTime"] == 0) & (output["alpha"] == 60) & (output["E_probs"] == "(0.1, 0.8, 0.1)")]
-plotOvertime = plotOvertime.sort_values(by=["overtimeC"])
-print(plotOvertime[cost_columns])
-
-plotOvertime.plot(x="overtimeC", y=cost_columns, kind="line")
-plt.show()
+# Plot overtimes
+for idx_l in range(0, leadTimes.size, 1):
+    plotOvertime = output[(output["LeadTime"] == leadTimes[idx_l]) & (output["alpha"] == 60) & (0.199 < output["Uncertainty"]) & (output["Uncertainty"] < 0.201)]
+    plotOvertime = plotOvertime.sort_values(by=["overtimeC"])
+    plotOvertime.plot(x="overtimeC", y=cost_columns, kind="line")
+    plt.title(f"Impact of overtime cost for lead time {leadTimes[idx_l]} ")
+    plt.show()
