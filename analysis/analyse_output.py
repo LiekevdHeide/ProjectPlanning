@@ -146,18 +146,9 @@ for idx_l in range(0, leadTimes.size, 1):
     plotUncertainty = plotUncertainty.sort_values(by=["Uncertainty"], ascending=False)
 
     fig, ax = plt.subplots()
-    for idx_c in range(0, 3, 1):
-        ax.scatter(x=plotUncertainty["Uncertainty"], y=plotUncertainty[cost_columns[idx_c]])
-
-    # set locations and names of the labels
-    plt.xticks([0.0, 0.1, 0.2, 0.3, 0.4])
-    plt.title(f"Impact of uncertainty for lead time {leadTimes[idx_l]}")
-    # plt.show()
-
-    fig, ax = plt.subplots()
     plotUncertainty.plot(ax=ax, x="Uncertainty", y=cost_columns, kind="line")
     plt.xticks([0.0, 0.1, 0.2, 0.3, 0.4])
-    plt.title(f"Lead time {leadTimes[idx_l]}")
+    plt.title(f"Impact of uncertainty for Lead time {leadTimes[idx_l]}")
     plt.show()
 
 # Plot overtimes
