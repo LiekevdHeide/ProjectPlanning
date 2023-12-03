@@ -6,14 +6,14 @@ Input: schedule for each phase, time and remaining work:
 Output: plot with colors to indicate if we schedule in lead time L
 """
 import numpy as np
-import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import matplotlib.ticker as mticker
 
-matplotlib.rcParams["text.usetex"] = True
-# matplotlib.rcParams["font.family"] = "Helvetica"
-# matplotlib.rcParams["font.size"] = 12
+from matplotlib import rc
+
+rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
+rc('text', usetex=True)
 
 
 def create(setting, planning):
