@@ -8,7 +8,7 @@ from matplotlib import rc
 
 rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 rc('text', usetex=True)
-
+rc('font', **{'size': 18})
 
 def parse_inputs():
     parser = argparse.ArgumentParser()
@@ -65,6 +65,7 @@ for idx_l in range(0, leadTimes.size, 1):
     plt.xlabel("Overtime cost")
     plt.ylabel("Cost")
     plt.legend(frameon=False, loc="upper left")
+    fig.tight_layout()
 
     if parser.savePlot:
         plt.savefig(
@@ -73,7 +74,6 @@ for idx_l in range(0, leadTimes.size, 1):
     else:
         plt.title(f"Impact of overtime cost for lead time {leadTimes[idx_l]}")
 
-    fig.tight_layout()
     plt.show()
 
     # plotOvertime.plot(x="overtimeC", y=cost_columns, kind="line")
