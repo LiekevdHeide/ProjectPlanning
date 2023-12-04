@@ -56,9 +56,11 @@ for idx_l in range(0, leadTimes.size, 1):
     print(plotUncertainty['Uncertainty'].unique())
 
     fig, ax = plt.subplots()
+    markerStyles = ["o", "s", "^"]
     for idx_c in range(0, 3, 1):
         ax.scatter(x=plotUncertainty["Uncertainty"], y=plotUncertainty[cost_columns[idx_c]],
-                   label=f"{cost_column_labels[idx_c]}")
+                   label=f"{cost_column_labels[idx_c]}",
+                   edgecolor="black", facecolor='none', marker=markerStyles[idx_c])
 
     # set locations and names of the labels
     plt.xticks([0.0, 0.1, 0.2, 0.3, 0.4])

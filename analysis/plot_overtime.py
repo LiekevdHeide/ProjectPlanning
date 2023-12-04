@@ -53,9 +53,11 @@ for idx_l in range(0, leadTimes.size, 1):
     print(output["overtimeC"].unique())
 
     fig, ax = plt.subplots()
+    markerStyles = ["o", "s", "^"]
     for idx_c in range(0, 3, 1):
         ax.scatter(x=plotOvertime["overtimeC"], y=plotOvertime[cost_columns[idx_c]],
-                   label=f"{cost_column_labels[idx_c]}")
+                   label=f"{cost_column_labels[idx_c]}",
+                   edgecolor="black", facecolor='none', marker=markerStyles[idx_c])
 
     # set locations and names of the labels
     plt.xticks([1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4, 2.6])
