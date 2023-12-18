@@ -61,7 +61,7 @@ for idx_l in range(0, leadTimes.size, 1):
 
     # set locations and names of the labels
     plt.xticks([1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4, 2.6])
-    plt.ylim(bottom=28, top=50)
+    plt.ylim(bottom=28, top=52)
     plt.xlabel("Overtime cost")
     plt.ylabel("Cost")
     plt.legend(frameon=False, loc="upper left")

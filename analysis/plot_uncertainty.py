@@ -64,7 +64,7 @@ for idx_l in range(0, leadTimes.size, 1):
 
     # set locations and names of the labels
     plt.xticks([0.0, 0.1, 0.2, 0.3, 0.4])
-    plt.ylim(bottom=28, top=40)
+    plt.ylim(bottom=28, top=52)
     plt.xlabel("Uncertainty")
     plt.ylabel("Cost")
     plt.legend(frameon=False, loc="upper left")
