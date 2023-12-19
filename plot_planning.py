@@ -134,7 +134,7 @@ def create(setting, planning):
         axarr[(0, j)].set_title(f"Phase {j + 1}")
     for i in range(max(1, 2**setting.LeadTime)):
         plan = f"{i:0{setting.LeadTime}b}"[::-1]
-        axarr[(i, 0)].annotate(f"Plan {plan}?", (-0.5, 0.5), xycoords='axes fraction',
+        axarr[(i, 0)].annotate(f"x=({plan[0]},{plan[1]},A)", (-0.5, 0.5), xycoords='axes fraction',
                                rotation=0, va='center', fontsize=12)
 
     # Get the colors of the values, according to the
