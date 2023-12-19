@@ -42,6 +42,11 @@ fileToRead = parser.file
 output_og = pd.read_csv(fileToRead, header="infer", sep=";")
 output = clean_output_files.clean(output_og)
 
+# For paper output:
+output = output[output['E_probs'] != "(0.005, 0.99, 0.005)"]
+output = output[output['E_probs'] != "(0.025, 0.95, 0.025)"]
+output = output[output['E_probs'] != "(0.15, 0.7, 0.15)"]
+
 # -----------------------------------------------------------------------------
 # Overall differences:
 basic_cols = ['solution_cost_b', "split_shiftC_b",
