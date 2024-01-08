@@ -40,12 +40,15 @@ parser = parse_inputs()
 # -------------check completeness of experiments-------------------------------
 fileToRead = parser.file
 output_og = pd.read_csv(fileToRead, header="infer", sep=";")
-output = clean_output_files.clean(output_og)
+output = clean_output_files.clean(output_og, True)
 
 # For paper output:
 output = output[output['E_probs'] != "(0.005, 0.99, 0.005)"]
 output = output[output['E_probs'] != "(0.025, 0.95, 0.025)"]
 output = output[output['E_probs'] != "(0.15, 0.7, 0.15)"]
+
+output = output[output['overtimeC'] != 1.25]
+output = output[output['overtimeC'] != 1.75]
 
 # -----------------------------------------------------------------------------
 # Overall differences:
