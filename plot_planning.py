@@ -52,20 +52,21 @@ def create(setting, planning):
         for j in range(setting.NumPhases):
             # if lead time = 0: only one column -> index is 1 value
             if setting.LeadTime == 0:
-                index = (i,)
+                index = (j,)
             else:
                 index = (i, j)
             if sum(index) != 0:
                 axarr[index].imshow(
                     planning[i, j], cmap=plt.cm.Greys, interpolation="none"
                 )
-            axarr[index].axvline(x=1.5, color='red')
+            if setting.LeadTime == 2:
+                axarr[index].axvline(x=1.5, color='red')
 
     for i in range(max(1, 2**setting.LeadTime)):
         for j in range(setting.NumPhases):
             # Index = location of subplot [x, y] coordinate
             if setting.LeadTime == 0:
-                index = i
+                index = (j,)
             else:
                 index = (i, j)
             if j == 0:
@@ -91,9 +92,18 @@ def create(setting, planning):
             # axarr[index].xaxis.set_major_locator(
             #     mticker.FixedLocator(ticks_loc)
             # )
-            ticks_loc = [int(x - 1) for x in ticks_loc]
-            ticks_loc[0] = 0
-            ticks_loc[1] = 0
+            if setting.LeadTime == 0:
+                print(ticks_loc)
+                axarr[index].set_xticks(ticks_loc)
+                ticks_loc = [int(x + 1) for x in ticks_loc]  # - 1
+                print(ticks_loc)
+                print(axarr[index].get_xlim)
+                axarr[index].set_xlim(left=-1, right=20)
+            if setting.LeadTime == 2:
+                ticks_loc = ticks_loc[setting.LeadTime:]  # No labels for all events before start project
+                ticks_loc = ticks_loc[:-1]
+                axarr[index].set_xticks(ticks_loc)
+                ticks_loc = [int(x - 1) for x in ticks_loc]
             axarr[index].set_xticklabels(ticks_loc)  # [int(x + 1) for x in ticks_loc])
             # x_labels = [0, 0, 0, 0, 0] + list(range(1, setting.Deadline + 2))
             # axarr[index].set_xticklabels([0, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19])
@@ -131,11 +141,20 @@ def create(setting, planning):
 
     # Add caption only to top row:
     for j in range(setting.NumPhases):
-        axarr[(0, j)].set_title(f"Phase {j + 1}")
+        if setting.LeadTime == 0:
+            axarr[j].set_title(f"Phase {j + 1}")
+        else:
+            axarr[(0, j)].set_title(f"Phase {j + 1}")
     for i in range(max(1, 2**setting.LeadTime)):
-        plan = f"{i:0{setting.LeadTime}b}"[::-1]
-        axarr[(i, 0)].annotate(f"x=({plan[0]},{plan[1]},A)", (-0.5, 0.5), xycoords='axes fraction',
-                               rotation=0, va='center', fontsize=12)
+        if setting.LeadTime == 0:
+            plan = f"{i:0{setting.LeadTime}b}"[::-1]
+            axarr[0].annotate(f"x=(.)", (-0.5, 0.5), xycoords='axes fraction',
+                              rotation=0, va='center', fontsize=12)
+        else:
+            plan = f"{i:0{setting.LeadTime}b}"[::-1]
+            if setting.LeadTime == 2:
+                axarr[(i, 0)].annotate(f"x=({plan[0]},{plan[1]},.)", (-0.5, 0.5), xycoords='axes fraction',
+                                       rotation=0, va='center', fontsize=12)
 
     # Get the colors of the values, according to the
     # colormap used by imshow, used in plot[0,0]
