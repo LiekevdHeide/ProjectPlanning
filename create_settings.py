@@ -126,4 +126,9 @@ def create(args):
         f"threshold policy is also {s_class.threshold_pol_cost}."
     )
 
+    assert s_class.LeadTime % 2 == 0, (
+        "This only works for even lead times (then the first shift of the "
+        "project is a normal shift."
+    )
+
     return s_class

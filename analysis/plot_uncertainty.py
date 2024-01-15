@@ -95,7 +95,11 @@ for files in range(3):
     plt.ylim(bottom=28, top=50)
     plt.xlabel(labelsToRead[files])
     plt.ylabel("Cost")
-    plt.legend(frameon=False, loc="upper left")
+    if files != 2:
+        plt.legend(frameon=False, loc="upper left")
+    else:
+        plt.legend(frameon=False, loc="upper right")
+    fig.set_size_inches(6, 4.8)
     fig.tight_layout()
 
     if parser.savePlot:

@@ -116,16 +116,16 @@ for c in range(len(parameter_columns)):
 
 print("Output cost, then percentage increases:")
 for c in range(len(parameter_columns)):
-    print(output.groupby(parameter_columns[c])[cost_perc_columns].mean().to_latex(
+    print(output.groupby(parameter_columns[c])[cost_perc_columns].aggregate(['min','mean', 'max']).to_latex(
         float_format="{:.2f}%".format))
 
-for c in range(len(parameter_columns)):
-    print(output.groupby(parameter_columns[c])[perc_columns].mean().to_latex(
-        float_format="{:.2f}%".format))
+# for c in range(len(parameter_columns)):
+#     print(output.groupby(parameter_columns[c])[perc_columns].mean().to_latex(
+#         float_format="{:.2f}%".format))
 
-for c in range(len(parameter_columns)):
-    print(output.groupby(parameter_columns[c])[threshold_columns].mean().to_latex(
-        float_format="{:.2f}".format))
+# for c in range(len(parameter_columns)):
+#     print(output.groupby(parameter_columns[c])[threshold_columns].mean().to_latex(
+#         float_format="{:.2f}".format))
 
 output.columns = output.columns.str.removeprefix("split_")
 split_cost_columns = [
