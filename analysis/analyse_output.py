@@ -302,7 +302,7 @@ for name, split in per_split.items():
 ax.invert_yaxis()
 ax.set_xlim(0, 55)
 ax.set_xlabel("Cost")
-ax.legend(loc="upper right", frameon=False)
+ax.legend(loc="lower right", frameon=False)
 fig.set_size_inches(6, 2.3)
 plt.subplots_adjust(left=0.2, right=0.95, top=0.9, bottom=0.1)
 # plt.tight_layout
