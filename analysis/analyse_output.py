@@ -4,8 +4,14 @@ Input: -f file name (including directory)
 """
 import argparse
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats
+
+from matplotlib import rc
+
+rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
+rc('text', usetex=True)
 
 import clean_output_files
 
@@ -166,3 +172,176 @@ for idx_l in range(0, leadTimes.size, 1):
     plotOvertime.plot(x="overtimeC", y=cost_columns, kind="line")
     plt.title(f"Impact of overtime cost for lead time {leadTimes[idx_l]} ")
     plt.show()
+
+# ------------------------------------------------------------------------------------------------------------
+# Plot bar chart with cost split
+print("Plot bar chart")
+
+labels = ("Optimal L=0", "Basic L=0", "Shift-based L=0",
+          "Optimal L=2", "Basic L=2", "Shift-based L=2",
+          "Optimal L=14", "Basic L=14", "Shift-based L=14")
+
+fig, ax = plt.subplots()
+per_split = {
+        "Day shift": np.hstack((np.array(output[output["LeadTime"] == 0][["shiftC_o", "shiftC_b", "shiftC_c"]].mean()),
+                                np.array(output[output["LeadTime"] == 2][["shiftC_o", "shiftC_b", "shiftC_c"]].mean()),
+                                np.array(output[output["LeadTime"] == 2][["shiftC_o", "shiftC_b", "shiftC_c"]].mean()))).ravel(),
+        "Night shift": np.hstack((np.array(output[output["LeadTime"] == 0][["overtimeC_o", "overtimeC_b", "overtimeC_c"]].mean()),
+                                  np.array(output[output["LeadTime"] == 2][["overtimeC_o", "overtimeC_b", "overtimeC_c"]].mean()),
+                                  np.array(output[output["LeadTime"] == 14][["overtimeC_o", "overtimeC_b", "overtimeC_c"]].mean()))).ravel(),
+        # "Early reward": np.hstack((np.array(output[output["LeadTime"] == 0][["earlyC_o", "earlyC_b", "earlyC_c"]].mean()),
+        #                            np.array(output[output["LeadTime"] == 2][["earlyC_o", "earlyC_b", "earlyC_c"]].mean()),
+        #                            np.array(output[output["LeadTime"] == 14][["earlyC_o", "earlyC_b", "earlyC_c"]].mean()))).ravel(),
+        "Unfinished cost": np.hstack((np.array(output[output["LeadTime"] == 0][["phaseC_o", "phaseC_b", "phaseC_c"]].mean()),
+                                      np.array(output[output["LeadTime"] == 2][["phaseC_o", "phaseC_b", "phaseC_c"]].mean()),
+                                      np.array(output[output["LeadTime"] == 14][["phaseC_o", "phaseC_b", "phaseC_c"]].mean()))).ravel()
+}
+colors = ("black", "gray", "lightgray")
+bottom = np.zeros(9)
+c = 0
+for name, split in per_split.items():
+    p = ax.barh(labels, split, 0.5, label=name, left=bottom, color=colors[c])
+    c += 1
+    bottom += split
+
+ax.invert_yaxis()
+ax.set_xlim(0, 55)
+ax.set_xlabel("Cost")
+ax.legend(loc="upper right", frameon=False)
+fig.set_size_inches(6, 2.3)
+plt.subplots_adjust(left=0.2, right=0.95, top=0.9, bottom=0.1)
+# plt.tight_layout
+plt.savefig("Cost_split_Leadtime.pdf")
+plt.show()
+
+# ----------------------
+# Plot cost split for uncertainty
+
+
+labels = ("Optimal deterministic", "Basic deterministic", "Shift-based deterministic",
+          "Optimal low uncertainty", "Basic low uncertainty", "Shift-based low uncertainty",
+          "Optimal medium uncertainty", "Basic medium uncertainty", "Shift-based medium uncertainty",
+          "Optimal high uncertainty", "Basic high uncertainty", "Shift-based high uncertainty")
+
+fig, ax = plt.subplots()
+per_split = {
+        "Day shift": np.hstack((np.array(output[output["E_probs"] == "(0.0, 1.0, 0.0)"][["shiftC_o", "shiftC_b", "shiftC_c"]].mean()),
+                                np.array(output[output["E_probs"] == "(0.05, 0.9, 0.05)"][["shiftC_o", "shiftC_b", "shiftC_c"]].mean()),
+                                np.array(output[output["E_probs"] == "(0.1, 0.8, 0.1)"][["shiftC_o", "shiftC_b", "shiftC_c"]].mean()),
+                                np.array(output[output["E_probs"] == "(0.2, 0.6, 0.2)"][["shiftC_o", "shiftC_b", "shiftC_c"]].mean()))).ravel(),
+        "Night shift": np.hstack((np.array(output[output["E_probs"] == "(0.0, 1.0, 0.0)"][["overtimeC_o", "overtimeC_b", "overtimeC_c"]].mean()),
+                                  np.array(output[output["E_probs"] == "(0.05, 0.9, 0.05)"][["overtimeC_o", "overtimeC_b", "overtimeC_c"]].mean()),
+                                  np.array(output[output["E_probs"] == "(0.1, 0.8, 0.1)"][["overtimeC_o", "overtimeC_b", "overtimeC_c"]].mean()),
+                                  np.array(output[output["E_probs"] == "(0.2, 0.6, 0.2)"][["overtimeC_o", "overtimeC_b", "overtimeC_c"]].mean()))).ravel(),
+        "Unfinished cost": np.hstack((np.array(output[output["E_probs"] == "(0.0, 1.0, 0.0)"][["phaseC_o", "phaseC_b", "phaseC_c"]].mean()),
+                                      np.array(output[output["E_probs"] == "(0.05, 0.9, 0.05)"][["phaseC_o", "phaseC_b", "phaseC_c"]].mean()),
+                                      np.array(output[output["E_probs"] == "(0.1, 0.8, 0.1)"][["phaseC_o", "phaseC_b", "phaseC_c"]].mean()),
+                                      np.array(output[output["E_probs"] == "(0.2, 0.6, 0.2)"][["phaseC_o", "phaseC_b", "phaseC_c"]].mean()))).ravel()
+}
+
+# per_split = {
+#         "Day shift": np.hstack((np.array(output[output["Uncertainty"] == 0.0][["shiftC_o", "shiftC_b", "shiftC_c"]].mean()),
+#                                 np.array(output[output["Uncertainty"] == 0.1][["shiftC_o", "shiftC_b", "shiftC_c"]].mean()),
+#                                 np.array(output[output["Uncertainty"] == 0.2][["shiftC_o", "shiftC_b", "shiftC_c"]].mean()),
+#                                 np.array(output[output["Uncertainty"] == 0.4][["shiftC_o", "shiftC_b", "shiftC_c"]].mean()))).ravel(),
+#         "Night shift": np.hstack((np.array(output[output["Uncertainty"] == 0.0][["overtimeC_o", "overtimeC_b", "overtimeC_c"]].mean()),
+#                                   np.array(output[output["Uncertainty"] == 0.1][["overtimeC_o", "overtimeC_b", "overtimeC_c"]].mean()),
+#                                   np.array(output[output["Uncertainty"] == 0.2][["overtimeC_o", "overtimeC_b", "overtimeC_c"]].mean()),
+#                                   np.array(output[output["Uncertainty"] == 0.4][["overtimeC_o", "overtimeC_b", "overtimeC_c"]].mean()))).ravel(),
+#         "Unfinished cost": np.hstack((np.array(output[output["Uncertainty"] == 0.0][["phaseC_o", "phaseC_b", "phaseC_c"]].mean()),
+#                                       np.array(output[output["Uncertainty"] == 0.1][["phaseC_o", "phaseC_b", "phaseC_c"]].mean()),
+#                                       np.array(output[output["Uncertainty"] == 0.2][["phaseC_o", "phaseC_b", "phaseC_c"]].mean()),
+#                                       np.array(output[output["Uncertainty"] == 0.4][["phaseC_o", "phaseC_b", "phaseC_c"]].mean()))).ravel()
+# }
+
+colors = ("black", "gray", "lightgray")
+bottom = np.zeros(12)
+c = 0
+for name, split in per_split.items():
+    p = ax.barh(labels, split, 0.5, label=name, left=bottom, color=colors[c])
+    c += 1
+    bottom += split
+
+ax.invert_yaxis()
+ax.set_xlim(0, 55)
+ax.set_xlabel("Cost")
+ax.legend(loc="upper right", frameon=False)
+fig.set_size_inches(6, 2.3)
+plt.subplots_adjust(left=0.35, right=0.98, top=0.9, bottom=0.1)
+# plt.tight_layout
+plt.savefig("Cost_split_Uncertainty.pdf")
+plt.show()
+
+# -----------------------------------------------------------------------
+# Deadline
+
+labels = ("Optimal T=50", "Basic T=50", "Shift-based T=50",
+          "Optimal T=60", "Basic T=60", "Shift-based T=60",
+          "Optimal T=70", "Basic T=70", "Shift-based T=70")
+
+fig, ax = plt.subplots()
+per_split = {
+        "Day shift": np.hstack((np.array(output[output["alpha"] == 50][["shiftC_o", "shiftC_b", "shiftC_c"]].mean()),
+                                np.array(output[output["alpha"] == 50][["shiftC_o", "shiftC_b", "shiftC_c"]].mean()),
+                                np.array(output[output["alpha"] == 50][["shiftC_o", "shiftC_b", "shiftC_c"]].mean()))).ravel(),
+        "Night shift": np.hstack((np.array(output[output["alpha"] == 60][["overtimeC_o", "overtimeC_b", "overtimeC_c"]].mean()),
+                                  np.array(output[output["alpha"] == 60][["overtimeC_o", "overtimeC_b", "overtimeC_c"]].mean()),
+                                  np.array(output[output["alpha"] == 60][["overtimeC_o", "overtimeC_b", "overtimeC_c"]].mean()))).ravel(),
+        "Unfinished cost": np.hstack((np.array(output[output["alpha"] == 70][["phaseC_o", "phaseC_b", "phaseC_c"]].mean()),
+                                      np.array(output[output["alpha"] == 70][["phaseC_o", "phaseC_b", "phaseC_c"]].mean()),
+                                      np.array(output[output["alpha"] == 70][["phaseC_o", "phaseC_b", "phaseC_c"]].mean()))).ravel()
+}
+colors = ("black", "gray", "lightgray")
+bottom = np.zeros(9)
+c = 0
+for name, split in per_split.items():
+    p = ax.barh(labels, split, 0.5, label=name, left=bottom, color=colors[c])
+    c += 1
+    bottom += split
+
+ax.invert_yaxis()
+ax.set_xlim(0, 55)
+ax.set_xlabel("Cost")
+ax.legend(loc="upper right", frameon=False)
+fig.set_size_inches(6, 2.3)
+plt.subplots_adjust(left=0.2, right=0.95, top=0.9, bottom=0.1)
+# plt.tight_layout
+plt.savefig("Cost_split_Deadline.pdf")
+plt.show()
+
+# ------------------------------------
+# Overtime cost
+
+labels = ("Optimal c=1.5", "Basic c=1.5", "Shift-based c=1.5",
+          "Optimal c=2", "Basic c=2", "Shift-based c=2",
+          "Optimal c=2.5", "Basic c=2.5", "Shift-based c=2.5")
+
+fig, ax = plt.subplots()
+per_split = {
+        "Day shift": np.hstack((np.array(output[output["overtimeC"] == 1.5][["shiftC_o", "shiftC_b", "shiftC_c"]].mean()),
+                                np.array(output[output["overtimeC"] == 1.5][["shiftC_o", "shiftC_b", "shiftC_c"]].mean()),
+                                np.array(output[output["overtimeC"] == 1.5][["shiftC_o", "shiftC_b", "shiftC_c"]].mean()))).ravel(),
+        "Night shift": np.hstack((np.array(output[output["overtimeC"] == 2.0][["overtimeC_o", "overtimeC_b", "overtimeC_c"]].mean()),
+                                  np.array(output[output["overtimeC"] == 2.0][["overtimeC_o", "overtimeC_b", "overtimeC_c"]].mean()),
+                                  np.array(output[output["overtimeC"] == 2.0][["overtimeC_o", "overtimeC_b", "overtimeC_c"]].mean()))).ravel(),
+        "Unfinished cost": np.hstack((np.array(output[output["overtimeC"] == 2.5][["phaseC_o", "phaseC_b", "phaseC_c"]].mean()),
+                                      np.array(output[output["overtimeC"] == 2.5][["phaseC_o", "phaseC_b", "phaseC_c"]].mean()),
+                                      np.array(output[output["overtimeC"] == 2.5][["phaseC_o", "phaseC_b", "phaseC_c"]].mean()))).ravel()
+}
+colors = ("black", "gray", "lightgray")
+bottom = np.zeros(9)
+c = 0
+for name, split in per_split.items():
+    p = ax.barh(labels, split, 0.5, label=name, left=bottom, color=colors[c])
+    c += 1
+    bottom += split
+
+ax.invert_yaxis()
+ax.set_xlim(0, 58)
+ax.set_xlabel("Cost")
+ax.legend(loc="upper right", frameon=False)
+fig.set_size_inches(6, 2.3)
+plt.subplots_adjust(left=0.2, right=0.95, top=0.9, bottom=0.1)
+# plt.tight_layout
+plt.savefig("Cost_split_OvertimeCost.pdf")
+plt.show()
