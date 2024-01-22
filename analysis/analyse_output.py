@@ -216,7 +216,7 @@ fig, ax = plt.subplots()
 per_split = {
         "Day shift": np.hstack((np.array(output[output["LeadTime"] == 0][["shiftC_o"]].mean()),  # ), "shiftC_b", "shiftC_c"]].mean()),
                                 np.array(output[output["LeadTime"] == 2][["shiftC_o"]].mean()),  # , "shiftC_b", "shiftC_c"]].mean()),
-                                np.array(output[output["LeadTime"] == 2][["shiftC_o"]].mean()))).ravel(),  # , "shiftC_b", "shiftC_c"]].mean()))).ravel(),
+                                np.array(output[output["LeadTime"] == 14][["shiftC_o"]].mean()))).ravel(),  # , "shiftC_b", "shiftC_c"]].mean()))).ravel(),
         "Night shift": np.hstack((np.array(output[output["LeadTime"] == 0][["overtimeC_o"]].mean()),  # , "overtimeC_b", "overtimeC_c"]].mean()),
                                   np.array(output[output["LeadTime"] == 2][["overtimeC_o"]].mean()),  # , "overtimeC_b", "overtimeC_c"]].mean()),
                                   np.array(output[output["LeadTime"] == 14][["overtimeC_o"]].mean()))).ravel(),  # , "overtimeC_b", "overtimeC_c"]].mean()))).ravel(),
