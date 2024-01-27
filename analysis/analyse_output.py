@@ -12,6 +12,7 @@ from matplotlib import rc
 
 rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 rc('text', usetex=True)
+rc('font', **{'size': 10})
 
 import clean_output_files
 
@@ -198,11 +199,17 @@ for name, split in per_split.items():
     bottom += split
 
 ax.invert_yaxis()
-ax.set_xlim(0, 55)
+ax.set_xlim(0, 40)
+# ax.set_ylim(-0.3, 2.5)
 ax.set_xlabel("Cost")
-ax.legend(loc="upper right", frameon=False)
-fig.set_size_inches(6, 2.3)
-plt.subplots_adjust(left=0.2, right=0.95, top=0.9, bottom=0.1)
+# Shrink current axis by 20%
+box = ax.get_position()
+ax.set_position([box.x0, box.y0 + box.height * 0.1,
+                 box.width, box.height * 0.9])
+# Put a legend to the right of the current axis
+ax.legend(loc='upper center', bbox_to_anchor=(0.5, 1.17), ncol=3, frameon=False)
+fig.set_size_inches(5, 2.2)
+plt.subplots_adjust(left=0.16, right=0.95, top=0.9, bottom=0.2)
 # plt.tight_layout
 plt.savefig("Cost_split_all.pdf")
 plt.show()
