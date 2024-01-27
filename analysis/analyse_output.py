@@ -178,16 +178,16 @@ for idx_l in range(0, leadTimes.size, 1):
 # Plot bar chart with cost split
 print("Plot bar chart")
 
-labels = ("Optimal", "Basic", "Shift-based")
+labels = ("Optimal", "Shift-based", "Basic")
 
 fig, ax = plt.subplots()
 per_split = {
-        "Day shift": np.array(output[["shiftC_o", "shiftC_b", "shiftC_c"]].mean()),
-        "Night shift": np.array(output[["overtimeC_o", "overtimeC_b", "overtimeC_c"]].mean()),
+        "Day shift": np.array(output[["shiftC_o", "shiftC_c", "shiftC_b"]].mean()),
+        "Night shift": np.array(output[["overtimeC_o", "overtimeC_c", "overtimeC_b"]].mean()),
         # "Early reward": np.hstack((np.array(output[output["LeadTime"] == 0][["earlyC_o", "earlyC_b", "earlyC_c"]].mean()),
         #                            np.array(output[output["LeadTime"] == 2][["earlyC_o", "earlyC_b", "earlyC_c"]].mean()),
         #                            np.array(output[output["LeadTime"] == 14][["earlyC_o", "earlyC_b", "earlyC_c"]].mean()))).ravel(),
-        "Unfinished cost": np.array(output[["phaseC_o", "phaseC_b", "phaseC_c"]].mean())
+        "Unfinished cost": np.array(output[["phaseC_o", "phaseC_c", "phaseC_b"]].mean())
 }
 print(per_split.items())
 colors = ("black", "gray", "lightgray")
