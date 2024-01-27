@@ -14,6 +14,7 @@ from matplotlib import rc
 
 rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 rc('text', usetex=True)
+rc('font', **{'size': 10})
 
 
 def create(setting, planning):
@@ -152,15 +153,15 @@ def create(setting, planning):
     for i in range(max(1, 2**setting.LeadTime)):
         if setting.LeadTime == 0:
             plan = f"{i:0{setting.LeadTime}b}"[::-1]
-            axarr[0].annotate(f"x=(.)", (-0.5, 0.5), xycoords='axes fraction',
-                              rotation=0, va='center', fontsize=12)
+            # axarr[0].annotate(f"x=(.)", (-0.5, 0.5), xycoords='axes fraction',
+            #                   rotation=0, va='center', fontsize=12)
         else:
             plan = f"{i:0{setting.LeadTime}b}"[::-1]
             if setting.LeadTime == 1:
-                axarr[(i, 0)].annotate(f"x=({plan[0]},.)", (-0.5, 0.5), xycoords='axes fraction',
+                axarr[(i, 0)].annotate(f"x=({plan[0]})", (-0.5, 0.5), xycoords='axes fraction',
                                        rotation=0, va='center', fontsize=12)
             if setting.LeadTime == 2:
-                axarr[(i, 0)].annotate(f"x=({plan[0]},{plan[1]},.)", (-0.5, 0.5), xycoords='axes fraction',
+                axarr[(i, 0)].annotate(f"x=({plan[0]},{plan[1]})", (-0.5, 0.5), xycoords='axes fraction',
                                        rotation=0, va='center', fontsize=12)
 
     # Get the colors of the values, according to the
@@ -173,9 +174,13 @@ def create(setting, planning):
     ]
 
     # Put those patched as legend-handles into the legend
+    if setting.LeadTime == 0:
+        location = "upper left"
+    if setting.LeadTime == 2:
+        location = "lower left"
     plt.figlegend(
         handles=patches,
-        loc="upper left",
+        loc=location,
         # ncol=2,
         # bbox_to_anchor=(0.99, 0.9999),  # 85),
         frameon=False,
@@ -186,9 +191,9 @@ def create(setting, planning):
         ax.label_outer()
 
     if setting.LeadTime == 0:
-        fig.set_size_inches(6, 2.3)
+        fig.set_size_inches(6, 1.6)
     if setting.LeadTime == 2:
-        fig.set_size_inches(6, 4.8)
+        fig.set_size_inches(6, 3.3)
     plt.tight_layout()
     # fig.subplots_adjust(top=0.88) # in combination with tight_layout
     pdf_title = f"vertical_Plot_"

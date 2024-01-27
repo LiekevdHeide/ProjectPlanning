@@ -8,7 +8,7 @@ from matplotlib import rc
 
 rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 rc('text', usetex=True)
-rc('font', **{'size': 18})
+rc('font', **{'size': 10})
 
 
 def parse_inputs():
