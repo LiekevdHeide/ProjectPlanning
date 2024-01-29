@@ -82,7 +82,7 @@ for files in range(3):
         plot = plot.sort_values(by=columnsToRead[files], ascending=False)
         ax.scatter(x=plot[columnsToRead[files]], y=plot["solution_cost_o"],
                    label=f"{column_labels[idx_l]}",
-                   edgecolor="black", facecolor='none', marker=markerStyles[idx_l])
+                   edgecolor="black", facecolor='none', marker=markerStyles[idx_l], s=15)
 
     # set locations and names of the labels
     if files == 0:
@@ -92,15 +92,19 @@ for files in range(3):
     if files == 2:
         plt.xticks([40, 45, 50, 55, 60, 65, 70, 75, 80])
 
-    plt.ylim(bottom=28, top=50)
-    plt.xlabel(labelsToRead[files])
-    plt.ylabel("Cost")
     if files != 2:
         plt.legend(frameon=False, loc="upper left")
+        top_lim = 40
     else:
         plt.legend(frameon=False, loc="upper right")
-    fig.set_size_inches(6, 4.8)
-    fig.tight_layout()
+        top_lim = 47
+
+    plt.ylim(bottom=28, top=top_lim)
+    plt.xlabel(labelsToRead[files])
+    plt.ylabel("Cost")
+    fig.set_size_inches(3, 2.4)
+    plt.subplots_adjust(left=0.16, right=0.95, top=0.95, bottom=0.18)
+    # fig.tight_layout()
 
     if parser.savePlot:
         plt.savefig(
