@@ -120,6 +120,10 @@ for c in range(len(parameter_columns)):
     print(output.groupby(parameter_columns[c])[cost_columns].mean().to_latex(
         float_format="{:.2f}".format))
 
+# overall difference:
+print(output[cost_perc_columns].aggregate(['min','mean', 'max']).to_latex(
+        float_format="{:.2f}%".format))
+
 print("Output cost, then percentage increases:")
 for c in range(len(parameter_columns)):
     print(output.groupby(parameter_columns[c])[cost_perc_columns].aggregate(['min','mean', 'max']).to_latex(
